@@ -67,7 +67,7 @@ class TranscribedaudioController extends Controller
             'headers' => [
                 'Accept' => 'audio/mpeg',
                 'Content-Type' => 'application/json',
-                'xi-api-key' =>  'ea687c9ea5688319bee92bf46c053862',
+                'xi-api-key' =>  $key ,
             ],
             'json' => [
                 'text' => $message,
