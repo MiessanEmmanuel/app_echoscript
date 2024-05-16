@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-
+        <meta name="csrf-token" content="{{ csrf_token() }}">
         <title inertia>{{ config('app.name', 'Laravel') }}</title>
 
         <!-- Fonts -->
@@ -18,8 +18,6 @@
     </head>
     <body class="font-sans antialiased">
         @inertia
-        <div class="bg-gray-700 p-9">
-    bonjour pro
-        </div>
+        @csrf
     </body>
 </html>

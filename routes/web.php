@@ -1,18 +1,20 @@
 <?php
 
+use App\Http\Controllers\PagesController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\TranscribedaudioController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
-});
+Route::get('/', [PagesController::class, 'index']);
+Route::get('/history', [PagesController::class, 'showHistory']);
+
+Route::post('/text-to-speech', [TranscribedaudioController::class, 'generateTextAudio']);
+Route::get('/csrf-token', [PagesController::class, 'getCsrfToken']);
+
+
+
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
