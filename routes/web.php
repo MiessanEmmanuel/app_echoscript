@@ -11,6 +11,7 @@ Route::get('/', [PagesController::class, 'index']);
 Route::get('/history', [PagesController::class, 'showHistory']);
 
 Route::post('/text-to-speech', [TranscribedaudioController::class, 'generateTextAudio']);
+Route::post('/speech-to-speech', [TranscribedaudioController::class, 'generateSpeechAudio']);
 Route::get('/csrf-token', [PagesController::class, 'getCsrfToken']);
 
 

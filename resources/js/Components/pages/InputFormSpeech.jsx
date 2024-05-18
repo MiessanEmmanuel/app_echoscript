@@ -132,6 +132,7 @@ const InputFormSpeech = ({ voices, onSubmit }) => {
                         className="w-full rounded-lg shadow-lg border-ui-1 bg-white/60 focus:ring-0"
                         placeholder="Enter your text"
                     ></textarea>
+                    <input type="file" name="file"  />
                     <div className="bottom-3 right-0 h-full flex gap-2 items-center justify-end px-1.5">
                         <p className="text-sm text-light font-normal text-gray-500">
                             <span id="track-word">{text.length}</span> / <span id="limit-char">{/* {character} */}</span>

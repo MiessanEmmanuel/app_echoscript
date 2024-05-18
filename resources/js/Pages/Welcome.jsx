@@ -6,6 +6,7 @@ import Navigation from '@/Layouts/Navigation';
 import AudioFooter from '@/Components/pages/AudioFooter';
 import InputFormTest from '@/Components/pages/InputFormSpeech';
 import InputFormSpeech from '@/Components/pages/InputFormSpeech';
+import InputFormSpeechTest from '@/Components/pages/InputFormSpeechTest';
 
 export default function Welcome({ auth, laravelVersion, phpVersion, voices }) {
     const handleImageError = () => {
@@ -34,7 +35,7 @@ export default function Welcome({ auth, laravelVersion, phpVersion, voices }) {
             case 'text-to-speech':
                 return <InputForm voices={voices} onSubmit={handleFormSubmit} />;
             case 'speech-to-speech':
-                return <InputFormSpeech voices={voices} onSubmit={handleFormSubmit} />;
+                return <InputFormSpeechTest voices={voices} onSubmit={handleFormSubmit} />;
             default:
                 return null;
         }

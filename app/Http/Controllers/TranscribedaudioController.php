@@ -39,14 +39,12 @@ class TranscribedaudioController extends Controller
         $voice = $request->input('voice');
         $stability = $request->input('stability');
         $similarity_boost = $request->input('similarity_boost');
-       /*  $style = $request->input('style');
-        $use_speaker_boost = $request->input('use_speaker_boost'); */
+         $style = $request->input('style');
+        $use_speaker_boost = $request->input('use_speaker_boost');
         $category = $request->input('category');
         $message = $request->input('text');
 
-        if ($category == "speech-to-speech") {
-            $base64AudioSpeech = base64_encode($message);
-        }
+
 
         if ($use_speaker_boost = 1) {
             $use_speaker_boost_value = true;
@@ -67,33 +65,42 @@ class TranscribedaudioController extends Controller
             'headers' => [
                 'Accept' => 'audio/mpeg',
                 'Content-Type' => 'application/json',
-                'xi-api-key' =>  $key ,
+                'xi-api-key' =>  $key,
             ],
             'json' => [
                 'text' => $message,
                 "model_id" => "eleven_multilingual_v2",
                 "voice_settings" => [
-                    "stability" => $stability ?? 0.5,
-                    "similarity_boost" => $similarity_boost ?? 0.5,
-                    /* "style" => $style,
-                    "use_speaker_boost" => $use_speaker_boost_value, */
+                    "stability" => $stability ,
+                    "similarity_boost" => $similarity_boost,
+                    "style" => $style,
+                    "use_speaker_boost" => $use_speaker_boost,
 
                 ]
             ],
             'responseType' => 'arraybuffer',
         ]);
-        $audioContent = $response->getBody()->getContents();
+        if ($response->getStatusCode() == 200) {
+            $audioContent = $response->getBody()->getContents();
+            // Convertir le flux de données en une chaîne de caractères
+            $base64Audio = base64_encode($audioContent);
 
-        // Convertir le contenu du fichier audio en base64
-        // Convertir le flux de données en une chaîne de caractères
-
-        $base64Audio = base64_encode($audioContent);
-
-        // Vous pouvez également ajouter d'autres données à la réponse JSON si nécessaire
+        // réponse JSON
         $responseData = [
             'message' => 'le message a bien été envoyé',
             'audio' => $base64Audio
         ];
+        /// Retourner la réponse JSON
+         return response()->json($responseData);
+            // Vous pouvez ensuite sauvegarder le contenu audio dans un fichier ou le traiter comme nécessaire
+        } else {
+            // Gérer l'erreur
+            $errorCode = $response->getStatusCode();
+            $errorMessage = $response->getBody();
+            return response()->json(['Code' => $errorCode, 'ERROR' => $errorMessage ]);
+        }
+
+
 
         /* $audioContent->store('public/ckc'); */
         // Stocker le contenu du fichier audio dans le dossier 'app/public/audio' dans le stockage
@@ -114,11 +121,8 @@ class TranscribedaudioController extends Controller
 
         $this->uploadDbAudio($message, $voice, $audioFilePath, $category, $stability, $similarity_boost, $style, $use_speaker_boost_value, Auth::id());
  */
-        // Retourner la réponse JSON
-        return response()->json($responseData);
-        // Pour sauvegarder le fichier audio reçu dans une réponse
 
-        /* return response()->json(['message' => 'le message à bien été envoyé']); */
+
         //return redirect(route('accueil'));
     }
     public function generateSpeechAudio(Request $request)
@@ -131,73 +135,80 @@ class TranscribedaudioController extends Controller
         $style = $request->input('style');
         $use_speaker_boost = $request->input('use_speaker_boost');
         $category = $request->input('category');
-        $message = $request->input('text');
+        $audio = $request->file('audio');
+        $request->validate([
+            'audio' => 'required|file|mimes:mp3,wav',
+        ]);
+        $audioPath = $request->file('audio')->getPathname();
 
+        /*Verification */
         if ($use_speaker_boost = 1) {
             $use_speaker_boost_value = true;
         } else {
             $use_speaker_boost_value = false;
         }
-
         // Vérification des valeur de text et message
-        if (empty($message) || empty($voice)) {
-            return response()->json(['message' => 'Please provide a message and a valid voice.']);
+        if (empty($audioPath) || empty($voice)) {
+            return response()->json([
+                'message' => 'Please provide a message and a valid voice.',
+                'audio' => $audioPath,
+                'voice' => $voice,
+            ]);
         }
+        /*   $audioFileName = Auth::user()->name . '-' . Carbon::now()->format('Y-m-d-H-i-s') . '.mp3';
+        $audioFilePath = 'public/audios/' . Auth::user()->name . '/input/' . $audioFileName;
+        $options_aws = [
+            'visibility' => 'public',
+        ];
+         $base64AudioInput = base64_encode($audio); */
+        /* Storage::disk('s3')->put($audioFilePath, $audio,  $options_aws); */
+
 
         $key = env('ELEVENLABS_API_KEY'); // à mettre dans le fichier .env
 
         $client = new Client();
 
-        $response = $client->request('POST', 'https://api.elevenlabs.io/v1/' . $category ?? 'text-to-speech' . '/' . $voice, [
+        $response = $client->request('POST', 'https://api.elevenlabs.io/v1/speech-to-speech/' . $voice, [
             'headers' => [
-                'Accept' => 'audio/mpeg',
-                'Content-Type' => 'application/json',
-                'xi-api-key' =>  '7b34ce119fb5f362b4427e2907fe6290',
+                'Accept' => 'application/json',
+                'xi-api-key' => $key,
             ],
-            'json' => [
-                'text' => $message,
-                "model_id" => "eleven_multilingual_v2",
-                "voice_settings" => [
-                    "stability" => $stability ?? 0.5,
-                    "similarity_boost" => $similarity_boost ?? 0.5,
-                    "style" => $style,
-                    "use_speaker_boost" => $use_speaker_boost_value,
-
-                ]
+            'multipart' => [
+                [
+                    'name'     => 'audio',
+                    'contents' => fopen($audioPath, 'r'),
+                ],
+                [
+                    'name'     => 'model_id',
+                    'contents' => 'eleven_english_sts_v2',
+                ],
+                [
+                    'name'     => 'voice_settings',
+                    'contents' => json_encode([
+                        'stability' => $stability/100  ,
+                        'similarity_boost' => $similarity_boost/100,
+                        'style' => $style/100 ,
+                        'use_speaker_boost' => $use_speaker_boost/100,
+                    ]),
+                ],
             ],
             'responseType' => 'arraybuffer',
         ]);
+
         $audioContent = $response->getBody()->getContents();
 
-        // Convertir le contenu du fichier audio en base64
-        // Convertir le flux de données en une chaîne de caractères
-
+        // Convertir le contenu du fichier audio en base64 »»» Convertir le flux de données en une chaîne de caractères
         $base64Audio = base64_encode($audioContent);
 
-        // Vous pouvez également ajouter d'autres données à la réponse JSON si nécessaire
+        // réponse JSON
         $responseData = [
             'message' => 'le message a bien été envoyé',
             'audio' => $base64Audio
         ];
 
-        /* $audioContent->store('public/ckc'); */
-        // Stocker le contenu du fichier audio dans le dossier 'app/public/audio' dans le stockage
-        // Storage::put('audio/audio.mp3', $audioContent);
+        //$this->uploadAwsAmazon($base64Audio, "speech-to-speech");
 
-        $audioFileName = Auth::user()->name . '-' . Carbon::now()->format('Y-m-d-H-i-s') . '.mp3';
-        $audioFilePath = 'public/audios/' . Auth::user()->name . '/output/' . $audioFileName;
-        $options_aws = [
-            'visibility' => 'public',
-        ];
-        if ($category == 'speech-to-speech') {
-            $audioFilePathSpeech = 'public/audios/' . Auth::user()->name . '/input/' . $audioFileName;
-            Storage::disk('s3')->put($audioFilePathSpeech, base64_decode($base64Audio),  $options_aws);
-        }
-
-        Storage::disk('s3')->put($audioFilePath, base64_decode($base64Audio),  $options_aws);
-
-
-        $this->uploadDbAudio($message, $voice, $audioFilePath, $category, $stability, $similarity_boost, $style, $use_speaker_boost_value, Auth::id());
+        //$this->uploadDbAudio($audio, $voice, $audioFilePath, $category, $stability, $similarity_boost, $style, $use_speaker_boost_value, Auth::id());
 
         // Retourner la réponse JSON
         return response()->json($responseData);
@@ -228,6 +239,20 @@ class TranscribedaudioController extends Controller
         $audio->id_user = $user_id;
 
         $audio->save();
+    }
+    private function uploadAwsAmazon($base64Audio, $category)
+    {
+        $audioFileName = Auth::user()->name . '-' . Carbon::now()->format('Y-m-d-H-i-s') . '.mp3';
+        $options_aws = [
+            'visibility' => 'public',
+        ];
+        if ($category === 'speech-to-speech') {
+            $audioFilePathSpeech = 'public/audios/' . Auth::user()->name . '/output/' . $audioFileName;
+            Storage::disk('s3')->put($audioFilePathSpeech, base64_decode($base64Audio),  $options_aws);
+        } else {
+            $audioFilePath = 'public/audios/' . Auth::user()->name . '/' . $audioFileName;
+            Storage::disk('s3')->put($audioFilePath, base64_decode($base64Audio),  $options_aws);
+        }
     }
     public function editAudio(Request $request)
     {

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import SettingsVoice from '../SettingsVoice';
 /**
  * Composant InputForm qui prend en paramètres voices, character et onSubmit.
  *
@@ -15,13 +16,25 @@ const InputForm = ({ voices, onSubmit }) => {
     const [text, setText] = useState('');
     const [loading, setLoading] = useState(false);
 
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [stability, setStability] = useState(0.5);
+    const [similarity, setSimilarity] = useState(0.5);
+    const [style, setStyle] = useState(0.5);
+    const [speakerBoost, setSpeakerBoost] = useState(true);
+
+
+    //Ouvrir le Popup
+    const handleShowSettings = () => {
+        setIsModalOpen(true);
+    };
+    // Fermer le popup
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+    };
+
 
     // Récupérer le jeton CSRF depuis le serveur
     const csrfToken = document.head.querySelector('meta[name="csrf-token"]').content;
-    console.log(csrfToken);
-
-    console.log(onSubmit);
-
 
     /**
      * Fonction asynchrone pour suspendre l'exécution pendant un temps spécifié.
@@ -63,7 +76,7 @@ const InputForm = ({ voices, onSubmit }) => {
                 'X-CSRF-TOKEN': csrfToken,
                 'Accept': 'application/json',
             },
-            body: JSON.stringify({ text: texte, voice: voice })
+            body: JSON.stringify({ text: texte, voice: voice, stability : stability, similarity_boost: similarity,style:style, use_speaker_boost:speakerBoost })
         })
             .then(response => response.json())
             .then(data => {
@@ -111,22 +124,22 @@ const InputForm = ({ voices, onSubmit }) => {
                         </select>
                     </div>
                     <div className="lg:col-span-2">
-                        <select
-                            name="format"
-
-                            /* onChange={(e) => setFormat(e.target.value)} */
-                            className="w-full rounded-lg shadow-lg border-ui-1 bg-white/60 focus:ring-0"
+                        <button
+                            id="voiceSelect"
+                            onClick={handleShowSettings}
+                            type='button'
+                            className="w-1/3 p-2 rounded font-bold  border-ui-1 bg-gray-400 focus:ring-0"
                         >
-                            <option value="">Select your format</option>
-                            <option value=""></option>
-                            <option value=""></option>
-                        </select>
+                            Settings
+                        </button>
+                        <SettingsVoice isOpen={isModalOpen} handleClose={handleCloseModal} fixStability={setStability} fixSimilarity={setSimilarity} fixStyle={setStyle} fixSpeakerBoost={setSpeakerBoost} />
+
                     </div>
                 </div>
                 <div className="mb-6 relative">
                     <textarea
                         name="text"
-                        /* onChange={(e) => setText(e.target.value)} */
+                        onChange={(e) => setText(e.target.value)}
                         cols="30"
                         rows="10"
                         className="w-full rounded-lg shadow-lg border-ui-1 bg-white/60 focus:ring-0"
