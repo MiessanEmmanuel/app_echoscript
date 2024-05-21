@@ -74,7 +74,7 @@ function InputFormSpeechTest({ voices, onSubmit }) {
     return (
         <div className="flex items-center justify-center py-16 ">
             <form
-                className="bg-white p-8 rounded-xl  shadow-lg max-w-3xl w-full  border-ui-1 bg-gray-100/50"
+                className="bg-white/60 p-8 rounded-xl  shadow-lg max-w-3xl w-full  border-ui-1 bg-gray-100/50"
                 onSubmit={handleSubmit}
             >
                 <h2 className="text-2xl font-bold mb-6 text-center">SPEECH TO SPEECH</h2>
@@ -111,7 +111,7 @@ function InputFormSpeechTest({ voices, onSubmit }) {
 
                 </div>
 
-                <div className="mb-4 py-8 flex justify-center items-center">
+                <div className="mb-4 py-8 flex justify-center items-center ">
                     {/* <label htmlFor="audioFile" className="block text-gray-700 mb-2">Audio File</label> */}
                     <input
                         type="file"
@@ -119,7 +119,7 @@ function InputFormSpeechTest({ voices, onSubmit }) {
                         accept="audio/*"
                         onChange={handleFileChange}
                         required
-                        className="w-full p-2 border border-gray-300 rounded w-1/3 mx-auto"
+                        className=" p-2 border border-gray-300 rounded w-1/3 mx-auto"
                     />
                 </div>
                 <div className="flex justify-around mb-4">

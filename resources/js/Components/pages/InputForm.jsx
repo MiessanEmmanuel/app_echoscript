@@ -104,15 +104,15 @@ const InputForm = ({ voices, onSubmit }) => {
             </div>
             <form onSubmit={handleSubmit} method="POST" id="text-to-speech-form">
 
-                <div className="grid lg:grid-cols-3 lg:gap-x-4 grid-rows-2 gap-x-4 gap-y-4 lg:grid-rows-1 mb-6">
-                    <div>
+                <div className="grid lg:grid-cols-4 lg:gap-x-4 grid-rows-2 gap-x-4 gap-y-4 lg:grid-rows-1 mb-6">
+                    <div className='lg:col-span-3'>
                         <select
                             name="voice"
                             id="voiceForm"
 
                             /* onChange={(e) => setVoice(e.target.value)} */
                             required
-                            className="w-full rounded-lg shadow-lg border-ui-1 bg-white/60 focus:ring-0"
+                            className="w-full rounded-lg shadow-lg border-ui-1 bg-white/60 focus:ring-0 "
                         >
                             <option value="">Select your voice</option>
                             {voices ? Object.entries(voices).map(([voice, value]) => (
@@ -123,12 +123,12 @@ const InputForm = ({ voices, onSubmit }) => {
 
                         </select>
                     </div>
-                    <div className="lg:col-span-2">
+                    <div className="">
                         <button
                             id="voiceSelect"
                             onClick={handleShowSettings}
                             type='button'
-                            className="w-1/3 p-2 rounded font-bold  border-ui-1 bg-gray-400 focus:ring-0"
+                            className="w-full p-2 rounded font-bold  border-ui-1 bg-gray-400 focus:ring-0"
                         >
                             Settings
                         </button>
