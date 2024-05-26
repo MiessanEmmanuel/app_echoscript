@@ -17,7 +17,8 @@ const InputFormSpeech = ({ voices, onSubmit }) => {
 
 
     // Récupérer le jeton CSRF depuis le serveur
-    const csrfToken = document.head.querySelector('meta[name="csrf-token"]').content;
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
     console.log(csrfToken);
 
     console.log(onSubmit);

@@ -24,8 +24,15 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/project', [PagesController::class, 'showHomeProject'])->name('HOMEPROJECT');
     Route::post('/create-project', [ProjectController::class, 'add'])->name('ADD_PROJECT');
+    Route::post('/edit-project', [ProjectController::class, 'edit'])->name('EDIT_PROJECT');
+
     Route::get('/project/{id}/config', [PagesController::class, 'showConfigProjectOne'])->name('CONFIG_PROJECT');
     Route::get('/project/{id}', [PagesController::class, 'showProjectOne'])->name('PROJECT');
+
+    Route::post('/project/add-chapter',[ProjectController::class, 'addChapter'])->name('add-chapter');
+    Route::post('/project/edit-chapter',[ProjectController::class, 'editChapter'])->name('edit-chapter');
+    Route::post('/project/delete-chapter',[ProjectController::class, 'deleteChapter'])->name('delete-chapter');
+    Route::post('/project/generate-chapter',[ProjectController::class, 'generateChapter'])->name('generate-chapter');
 
     Route::post('/text-to-speech', [TranscribedaudioController::class, 'generateTextAudio'])->name('text-to-speech');
     Route::post('/speech-to-speech', [TranscribedaudioController::class, 'generateSpeechAudio'])->name('speech-to-speech');

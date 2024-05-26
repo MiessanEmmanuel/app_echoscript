@@ -1,8 +1,80 @@
 import React, { useState } from 'react';
 import Checkbox from "@/Components/Checkbox";
+import AudioFooter from '@/Components/pages/AudioFooter';
 
-const ProjectOne = ({ project }) => {
-    const [content, setContent] = useState("Enter your chapter");
+const ProjectOne = ({ project, chapters }) => {
+    if (chapters[0] == null) {
+        return "irns";
+    }
+    const [chapterCurrent, setChapterCurrent] = useState(chapters[0]);
+
+
+
+    const [dataAudio, setDataAudio] = useState(null);
+
+
+    /*
+    _LANGUE
+    _VOICES
+    _STABILITY
+    _SIMILARY
+    _STYLE
+    _SPEAKER_BOOST
+    _CHAPTER_TEXT
+    _CHAPTER_ID
+
+    */
+    const [langue, setLangue] = useState('En');
+    const [voiceChapter, setVoiceChapter] = useState(project.default_voice);
+    const [stability, setStability] = useState(50);
+    const [similarity, setSimilarity] = useState(50);
+    const [style, setStyle] = useState(50);
+    const [speakerBoost, setSpeakerBoost] = useState(true);
+
+
+    // Ce que l'utilisateur entre dans la partie editable
+    const [newChapterText, setNewChapterText] = useState(chapterCurrent.chapter_text);
+
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+
+
+    const handleRegenerate = () => {
+        fetch('/project/generate-chapter', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({
+                project_id: chapterCurrent.project_id,
+                chapter_id: chapterCurrent.id,
+                chapter_text: newChapterText,
+                langue: langue,
+                voice: voiceChapter,
+                stability: stability,
+                similarity: similarity,
+                style: style,
+                speakerBoost: speakerBoost
+            }),
+        })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(errData => {
+                        throw new Error(errData.message || 'Unknown error');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log(data);
+                setDataAudio(data.audio);
+            })
+            .catch(error => console.log(error));
+    }
+
+
 
     const applyHeaderTag = (tag) => {
         const selection = window.getSelection();
@@ -51,16 +123,21 @@ const ProjectOne = ({ project }) => {
             <div className="grid grid-cols-3 px-4 gap-x-5">
                 <div className=' col-span-2'>
                     <div className='my-5 text-bold'>
-                        <h2 className='text-3xl'>Chapitre 1</h2>
+                        <h2 className='text-3xl'>Chapter {chapterCurrent.chapter_number}: {chapterCurrent.chapter_title}</h2>
                     </div>
                     <div
-                        id="editable-content "
+                        id="editable-content"
                         contentEditable
                         className="border bg-violet-200/60 shadow-lg p-4 h-[400px] max-h-[400px]  rounded-xl"/* overflow-y-scroll */
-                        dangerouslySetInnerHTML={{ __html: content }}
+                        dangerouslySetInnerHTML={{ __html: chapterCurrent.chapter_text }} onInput={(e) => {
+                            const content = e.target.innerText;
+                            setNewChapterText(content)
+                        }}
+
                     />
+
                     <div className='my-5 '>
-                        <button type='button' className='bg-indigo-900 text-white py-2 px-4 rounded ml-auto shadow-lg' >Regenerate</button>
+                        <button type='button' className='bg-indigo-900 text-white py-2 px-4 rounded ml-auto shadow-lg' onClick={handleRegenerate}>Regenerate</button>
                     </div>
                 </div>
                 <div>
@@ -68,9 +145,8 @@ const ProjectOne = ({ project }) => {
                         <h2 className='text-3xl'>Parameter</h2>
                         <div>
                             <label htmlFor="">Voice:</label>
-                            <select name="voice" id="">
-                                <option value="">{project.default_voice}</option>
-
+                            <select name="voice" id="" onChange={(e) => { setVoiceChapter(e.target.value) }}>
+                                <option value={project.default_voice}>{project.default_voice}</option>
                             </select>
                         </div>
                     </div>
@@ -78,27 +154,28 @@ const ProjectOne = ({ project }) => {
                         <form >
                             <div className='mb-3'>
                                 <label htmlFor="language" className='mb-2 block'>Language</label>
-                                <select name="language" id="language" className='w-full'>
+                                <select name="language" id="language" className='w-full' onChange={(e) => { setLangue(e.target.value) }} >
                                     <option value="">Select your language</option>
-                                    <option value="En">{project.language}</option>
+                                    <option value="En">English</option>
+                                    <option value="Fr">French</option>
                                 </select>
                             </div>
                             <div className='mb-3'>
                                 <label htmlFor="stability" className='mb-2 block'>Stability</label>
-                                <input type="range" name="stability" id="stability" min="0" max="100" />
+                                <input type="range" name="stability" id="stability" onChange={(e) => { setStability(e.target.value) }} min="0" max="100" />
                             </div>
                             <div className='mb-3'>
                                 <label htmlFor="similarity" className='mb-2 block'>Similarity</label>
-                                <input type="range" name="similarity" id="similarity" min="0" max="100" />
+                                <input type="range" name="similarity" id="similarity" onChange={(e) => { setSimilarity(e.target.value) }} min="0" max="100" />
                             </div>
                             <div className='mb-3'>
                                 <label htmlFor="style" className='mb-2 block'>Style</label>
-                                <input type="range" name="style" id="style" min="0" max="100" />
+                                <input type="range" name="style" id="style" onChange={(e) => { setStyle(e.target.value) }} min="0" max="100" />
                             </div>
                             <div className='mb-3'>
-                                <label htmlFor="speaker" className='mb-2 '>Speaker Boost</label>
+                                <label htmlFor="speaker" className='mb-2 ' >Speaker Boost</label>
 
-                                <Checkbox name="speaker" id="speaker" />
+                                <Checkbox name="speaker" id="speaker" checked={speakerBoost} onChange={(e) => { setSpeakerBoost(e.target.checked) }} />
                             </div>
                         </form>
 
@@ -109,7 +186,7 @@ const ProjectOne = ({ project }) => {
             <div className='p-4' id='section'>
                 <div className='grid grid-cols-3'>
                     <div className='col-span-2'>
-
+                    <AudioFooter data={dataAudio} srcLinkAudio={chapterCurrent.chapter_audio} />
                     </div>
                     <div>
 
@@ -118,18 +195,16 @@ const ProjectOne = ({ project }) => {
                             <button className='block border text-center w-full bg-yellow-300 p-4 my-4'>
                                 Introduction
                             </button>
-                            <button className='block border text-center w-full bg-yellow-300/30 p-4   my-4'>
-                                Chapitre 1
-                            </button>
-                            <button className='block border text-center w-full bg-yellow-300/30 p-4  my-4'>
-                                Chapitre 2
-                            </button>
-                            <button className='block border text-center w-full bg-yellow-300/30 p-4  my-4'>
-                                Chapitre 3
-                            </button>
+                            {
+                                chapters.map((chapter, index) => (
+                                    <button key={chapter.id} onClick={() => {
+                                        setChapterCurrent(chapter)
+                                    }} className={` ${chapter== chapterCurrent ? 'bg-orange-600': 'bg-yellow-300'} block border text-center w-full bg-yellow-300 p-4 my-4`}>
+                                        Chapter  {chapter.chapter_number}
+                                    </button>
+                                ))
 
-
-
+                            }
                         </div>
                     </div>
                 </div>

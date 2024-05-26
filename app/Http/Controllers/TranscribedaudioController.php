@@ -46,12 +46,6 @@ class TranscribedaudioController extends Controller
 
 
 
-        if ($use_speaker_boost = 1) {
-            $use_speaker_boost_value = true;
-        } else {
-            $use_speaker_boost_value = false;
-        }
-
         // Vérification des valeur de text et message
         if (empty($message) || empty($voice)) {
             return response()->json(['message' => 'Please provide a message and a valid voice.']);
@@ -61,7 +55,7 @@ class TranscribedaudioController extends Controller
 
         $client = new Client();
 
-        $response = $client->request('POST', 'https://api.elevenlabs.io/v1/text-to-speech' . '/' . $voice, [
+        $response = $client->request('POST', 'https://api.elevenlabs.io/v1/text-to-speech/' . $voice, [
             'headers' => [
                 'Accept' => 'audio/mpeg',
                 'Content-Type' => 'application/json',
@@ -71,9 +65,9 @@ class TranscribedaudioController extends Controller
                 'text' => $message,
                 "model_id" => "eleven_multilingual_v2",
                 "voice_settings" => [
-                    "stability" => $stability ,
-                    "similarity_boost" => $similarity_boost,
-                    "style" => $style,
+                    "stability" => $stability/100 ,
+                    "similarity_boost" => $similarity_boost/100,
+                    "style" => $style/100,
                     "use_speaker_boost" => $use_speaker_boost,
 
                 ]
@@ -188,7 +182,7 @@ class TranscribedaudioController extends Controller
                         'stability' => $stability/100  ,
                         'similarity_boost' => $similarity_boost/100,
                         'style' => $style/100 ,
-                        'use_speaker_boost' => $use_speaker_boost/100,
+                        'use_speaker_boost' => $use_speaker_boost,
                     ]),
                 ],
             ],

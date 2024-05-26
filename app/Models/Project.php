@@ -8,4 +8,19 @@ use Illuminate\Database\Eloquent\Model;
 class Project extends Model
 {
     use HasFactory;
+
+   protected $fillable = [
+        'id',
+        'user_id',
+        'title',
+        'default_voice',
+        'introduction',
+        'language',
+        'category_id',
+
+    ];
+    public function chapters()
+    {
+        return $this->hasMany(ChapterProject::class);
+    }
 }

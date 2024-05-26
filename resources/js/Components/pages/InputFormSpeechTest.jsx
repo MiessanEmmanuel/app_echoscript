@@ -3,7 +3,8 @@ import React, { useState } from 'react';
 import SettingsVoice from '../SettingsVoice';
 
 function InputFormSpeechTest({ voices, onSubmit }) {
-    const csrfToken = document.head.querySelector('meta[name="csrf-token"]').content;
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
     const [selectedVoice, setSelectedVoice] = useState('Adam');
     const [audioFile, setAudioFile] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);

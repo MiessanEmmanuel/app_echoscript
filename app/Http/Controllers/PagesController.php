@@ -2,17 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\CategorieProject;
 use Inertia\Inertia;
 use App\Models\Project;
 use Illuminate\Http\Request;
+use App\Models\ChapterProject;
+use App\Models\CategorieProject;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Application;
+use Illuminate\Support\Facades\Storage;
 
 class PagesController extends Controller
 {
-    public function index(){
+    public function index()
+    {
         $voices = array(
             "Adam" => "pNInz6obpgDQGcFmaJgB",
             "Antoni" => "ErXwobaYiN019PkySvjV",
@@ -64,10 +67,12 @@ class PagesController extends Controller
         ]);
     }
 
-    public function showHistory(){
+    public function showHistory()
+    {
         return Inertia::render('History');
     }
-    public function showHomeProject(){
+    public function showHomeProject()
+    {
         $voices = array(
             "Adam" => "pNInz6obpgDQGcFmaJgB",
             "Antoni" => "ErXwobaYiN019PkySvjV",
@@ -114,37 +119,43 @@ class PagesController extends Controller
         //en fonction de l'utilisteur where user_id = Auth::id()
         return Inertia::render('project/HomeProject', [
             'projects' => $projects,
-             'voices' => $voices,
+            'voices' => $voices,
             'categories' =>  $categories,
 
         ]);
-
     }
 
-public function showProjectOne(Request $request){
-    $project = Project::where('id', $request->id)->where('user_id', Auth::id())->first();
-    if(!$project){
-        return null;
+    public function showProjectOne(Request $request)
+    {
+        $project = Project::where('id', $request->id)->where('user_id', Auth::id())->firstOrFail();
+        $chapters = ChapterProject::where('project_id', $request->id)->get();
+        foreach ($chapters as $key => $chapter) {
+            //$chapter->chapter_audio = Storage::url($chapter->chapter_audio);
+            $chapter->chapter_audio = 'https://appechoscript.s3.eu-north-1.amazonaws.com/' . $chapter->chapter_audio;
+        }
+        return Inertia::render(
+            'project/ProjectOne',
+            [
+                'project' => $project,
+                'chapters' => $chapters,
+            ]
+
+        );
     }
-    return Inertia::render('project/ProjectOne',[
-        'project' => $project,
-    ]
 
-);
-}
-
-public function showConfigProjectOne(Request $request){
-    $project = Project::where('id', $request->id)->where('user_id', Auth::id())->first();
-    if(!$project){
-        return null;
+    public function showConfigProjectOne(Request $request)
+    {
+        $project = Project::where('id', $request->id)->where('user_id', Auth::id())->first();
+        if (!$project) {
+            return null;
+        }
+        return Inertia::render('project/ConfigProjectOne', [
+            'project' => $project,
+        ]);
     }
-    return Inertia::render('project/ConfigProjectOne',[
-        'project' => $project,
-    ]);
 
-}
-
-    public function getCsrfToken(){
+    public function getCsrfToken()
+    {
         return csrf_token();
     }
 }

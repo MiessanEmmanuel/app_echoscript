@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 
-const AudioFooter = ({ data }) => {
+const AudioFooter = ({ data, srcLinkAudio }) => {
     const audioFooterRef = useRef(null);
     const trackRef = useRef(null);
     const elapseRef = useRef(null);
@@ -9,14 +9,18 @@ const AudioFooter = ({ data }) => {
     const iconPlayFooterRef = useRef(null);
     const buttonplayFooterRef = useRef(null);
 
+    console.log(srcLinkAudio);
     const [isPlayingFooter, setIsPlayingFooter] = useState(false);
 
     useEffect(() => {
-        if (data !== null) {
+        if (data !== null ) {
             audioFooterRef.current.src = `data:audio/mpeg;base64,${data}`;
             //audioFooterRef.current.play();
+        }else{
+            console.log(srcLinkAudio);
+            audioFooterRef.current.src = srcLinkAudio;
         }
-    }, [data]);
+    }, [data,srcLinkAudio]);
 
     const buildDuration = (duration) => {
         const minutes = Math.floor(duration / 60);

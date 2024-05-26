@@ -2,7 +2,8 @@ export default function CreateProject({ isOpen, categories, voices, handleCloseM
     if (!isOpen) return null;
 
     // Récupérer le jeton CSRF depuis le serveur
-    const csrfToken = document.head.querySelector('meta[name="csrf-token"]').content;
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
     const handleSubmitCreateProject = (e) => {
         e.preventDefault();
         const { name, description, category, voice, language } = e.target.elements;

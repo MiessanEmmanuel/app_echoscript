@@ -34,7 +34,8 @@ const InputForm = ({ voices, onSubmit }) => {
 
 
     // Récupérer le jeton CSRF depuis le serveur
-    const csrfToken = document.head.querySelector('meta[name="csrf-token"]').content;
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
 
     /**
      * Fonction asynchrone pour suspendre l'exécution pendant un temps spécifié.
