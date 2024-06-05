@@ -5,7 +5,7 @@ const Header = ({  name, description,button, children }) => {
 
 
     return (
-        <div id="headerhome" className="bg-white/60 px-6 py-4 backdrop-blur-xl border-dropz-[40] hidden lg:flex items-end">
+        <div id="headerhome" className="bg-white px-6 py-4 backdrop-blur-xl border-dropz-[40] hidden lg:flex items-end">
             <div className='w-4/5'>
                 <h2 className="tracking-tight font-bold text-xl  ">{name}</h2>
                 <p className="text-sm text-gray-600 font-light">

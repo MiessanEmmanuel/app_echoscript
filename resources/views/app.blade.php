@@ -18,9 +18,12 @@
     @inertiaHead
 </head>
 
-<body class="font-sans antialiased bg-white-blue ">
+<body class="font-sans antialiased section-heros">
+    <div class="!z-10 relative">
+        @inertia
 
-    @inertia
+    </div>
+
 </body>
 
 </html>

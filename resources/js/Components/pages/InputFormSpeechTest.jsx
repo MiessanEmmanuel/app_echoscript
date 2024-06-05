@@ -75,7 +75,7 @@ function InputFormSpeechTest({ voices, onSubmit }) {
     return (
         <div className="flex items-center justify-center py-16 ">
             <form
-                className="bg-white/60 p-8 rounded-xl  shadow-lg max-w-3xl w-full  border-ui-1 bg-gray-100/50"
+                className="bg-white/60 p-8 rounded-xl  shadow-lg max-w-3xl w-full   bg-gray-100/50"
                 onSubmit={handleSubmit}
             >
                 <h2 className="text-2xl font-bold mb-6 text-center">SPEECH TO SPEECH</h2>
@@ -89,7 +89,7 @@ function InputFormSpeechTest({ voices, onSubmit }) {
                             value={selectedVoice}
                             onChange={handleVoiceChange}
                             required
-                            className="w-2/3 p-2 rounded  border-ui-1 bg-white/60 focus:ring-0"
+                            className="w-2/3 p-2 rounded   bg-white/60 focus:ring-0"
                         >
                             <option value="">Select your voice</option>
                             {voices ? Object.entries(voices).map(([voice, value]) => (
@@ -103,7 +103,7 @@ function InputFormSpeechTest({ voices, onSubmit }) {
                             id="voiceSelect"
                             onClick={handleShowSettings}
                             type='button'
-                            className="w-1/3 p-2 rounded font-bold  border-ui-1 bg-gray-400 focus:ring-0"
+                            className="w-1/3 p-2 rounded font-bold   bg-gray-400 focus:ring-0"
                         >
                             Settings
                         </button>

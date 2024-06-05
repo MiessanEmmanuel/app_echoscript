@@ -7,6 +7,9 @@ import AudioFooter from '@/Components/pages/AudioFooter';
 import InputFormTest from '@/Components/pages/InputFormSpeech';
 import InputFormSpeech from '@/Components/pages/InputFormSpeech';
 import InputFormSpeechTest from '@/Components/pages/InputFormSpeechTest';
+import AnimateWriteText from '@/Components/text/AnimateWriteText';
+import IconCheck from '@/Components/Icons/IconCheck';
+
 
 export default function Welcome({ auth, laravelVersion, phpVersion, voices }) {
     const handleImageError = () => {
@@ -47,74 +50,26 @@ export default function Welcome({ auth, laravelVersion, phpVersion, voices }) {
             <Head title="Welcome" />
             <Navigation >
                 <div className="lg:pl-[4em] pl-0 ">
-                    <Header name='Echoscript' description='Lorem ipsum dolor sit amet consectetur adipisicing elit. Itaque, nisi dicta autem eveniet modi doloremque
+                    {/*  <Header name='Echoscript' description='Lorem ipsum dolor sit amet consectetur adipisicing elit. Itaque, nisi dicta autem eveniet modi doloremque
                     dolorem delectus, amet illum vero id doloribus aliquam.' button='oui' >
-                        <Link href='/project' className='inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150'> Go To Project</Link>
-                    </Header>
-                    <div className="col-span-2 pt-8 flex flex-col justify-between">
+                        <Link href='/project' className='inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-xl font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150'> Go To Project</Link>
+                    </Header> */}
+                    <div className="col-span-2 pt-8 flex flex-col justify-between  relative">
                         {/*  {{-- ********************** Title Inputs *********************** --}} */}
+                        {/* <AnimateWriteText text="Echoscript" /> */}
                         <div
-                            className="w-[80%] backdrop-blur-xl border-dropz-[30] bg-white/60 mx-auto border-ui rounded-lg px-6 py-4 grid lg:grid-cols-2 lg:gap-x-4 lg:gap-y-0 lg:grid-rows-1  grid-rows-2 gap-y-4 gap-x-0  ">
-                            <button onClick={handleButtonClickToText} className={`border-ui rounded-lg px-6 py-2  shadow-lg text-center font-semibold relative ${currentComponent == 'text-to-speech' ? 'bg-white-blue' : 'hover:bg-white-blue'}`}>
+                            className="w-[80%] bg-light-indigo mx-auto  rounded-xl px-6 py-4 grid lg:grid-cols-2 lg:gap-x-4 lg:gap-y-0 lg:grid-rows-1  grid-rows-2 gap-y-4 gap-x-0  ">
+                            <button onClick={handleButtonClickToText} className={` rounded-xl px-6 py-2  shadow-lg text-center font-semibold relative ${currentComponent == 'text-to-speech' ? 'bg-white' : 'hover:bg-white'}`}>
                                 <div className="absolute -left-2 -top-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className={` icon-check inline-block w-[1.2em] h-[1.2em] ${currentComponent == 'text-to-speech' ? 'block' : 'hidden'} `}
-                                        viewBox="0 0 53.18 53.18">
-                                        <defs>
-                                            <style>
-                                                {`
-                                                    .icn-check {
-                                                        fill: #031e35;
-                                                    }
+                                    <IconCheck fill='indigo' className={`icon-check !size-7  inline-block w-[1.2em] h-[1.2em] ${currentComponent == 'text-to-speech' ? 'block' : 'hidden'} `} />
 
-                                                    .cls-2 {
-                                                        fill: #fff;
-                                                    }
-                                                    `}
-                                            </style>
-                                        </defs>
-                                        <g id="Calque_2" data-name="Calque 2">
-                                            <g id="Calque_1-2" data-name="Calque 1">
-                                                <circle className="icn-check" cx="26.59" cy="26.59" r="26.59" />
-                                                <path className="cls-2"
-                                                    d="M10,27.56l8.21,8.22,5.05,5.06,5.06-5.06-5.06-5.05L15,22.52a3.33,3.33,0,0,0-4.72,0l-.32.32A3.33,3.33,0,0,0,10,27.56Z" />
-                                                <path className="cls-2"
-                                                    d="M18.21,35.78l5.05,5.06,5.06-5.06L44.13,20a3.58,3.58,0,0,0,0-5,3.56,3.56,0,0,0-5.05,0L23.26,30.73Z" />
-                                            </g>
-                                        </g>
-                                    </svg>
                                 </div>
                                 <span>Text To Speech</span>
                             </button>
-                            <button onClick={handleButtonClickToSpeech} className={`border-ui rounded-lg px-6 py-2  shadow-lg text-center font-semibold relative ${currentComponent == 'speech-to-speech' ? 'bg-white-blue' : 'hover:bg-white-blue'}`}>
-
+                            <button onClick={handleButtonClickToSpeech} className={` rounded-xl px-6 py-2  shadow-lg text-center font-semibold relative ${currentComponent == 'speech-to-speech' ? 'bg-white-blue' : 'hover:bg-white-blue'}`}>
                                 <span>Speech To Speech</span>
-
                                 <div className="absolute -left-2 -top-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className={` icon-check inline-block w-[1.2em] h-[1.2em] ${currentComponent == 'speech-to-speech' ? 'block' : 'hidden'} `}
-                                        viewBox="0 0 53.18 53.18">
-                                        <defs>
-                                            <style>
-                                                {`
-                                                    .icn-check {
-                                                        fill: #031e35;
-                                                    }
-
-                                                    .cls-2 {
-                                                        fill: #fff;
-                                                    }
-                                                    `}
-                                            </style>
-                                        </defs>
-                                        <g id="Calque_2" data-name="Calque 2">
-                                            <g id="Calque_1-2" data-name="Calque 1">
-                                                <circle className="icn-check" cx="26.59" cy="26.59" r="26.59" />
-                                                <path className="cls-2"
-                                                    d="M10,27.56l8.21,8.22,5.05,5.06,5.06-5.06-5.06-5.05L15,22.52a3.33,3.33,0,0,0-4.72,0l-.32.32A3.33,3.33,0,0,0,10,27.56Z" />
-                                                <path className="cls-2"
-                                                    d="M18.21,35.78l5.05,5.06,5.06-5.06L44.13,20a3.58,3.58,0,0,0,0-5,3.56,3.56,0,0,0-5.05,0L23.26,30.73Z" />
-                                            </g>
-                                        </g>
-                                    </svg>
+                                    <IconCheck fill='indigo' className={` icon-check  !size-7  inline-block w-[1.2em] h-[1.2em] ${currentComponent == 'speech-to-speech' ? 'block' : 'hidden'} `} />
                                 </div>
                             </button>
 
@@ -123,7 +78,7 @@ export default function Welcome({ auth, laravelVersion, phpVersion, voices }) {
                         {renderComponent()}
 
                         {/* {{-- ************* Read Vocal Footer ************* --}} */}
-                        <div id="" className="border-ui-top-2 bg-white/60 px-6 py-4  backdrop-blur-xl border-dropz-[30]  mt-6 w-full ">
+                        <div id="" className="-top-2 bg-white/60 px-6 py-4  backdrop-blur-xl border-drop  mt-6 w-full ">
                             <AudioFooter data={data} />
                         </div>
                     </div>

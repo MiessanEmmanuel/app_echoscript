@@ -7,7 +7,7 @@ const Navigation = ({children}) => {
     return (
         /* -- *********************** Menu *********************** -- */
         <>
-            <header className="lg:block hidden fixed left-0 top-0 h-full w-[4em] z-[41] p-3 backdrop-blur-xl  border-drop bg-white/60  " id="header-Normal">
+            <header className="lg:block hidden fixed left-0 top-0 h-full w-[4em] z-[41] p-3 backdrop-blur-xl  border-drop  bg-white " id="">
                 <nav className="flex flex-col justify-between  h-full">
                     <div className="flex-1 flex flex-col space-y-6" id="logopng">
 
@@ -15,19 +15,15 @@ const Navigation = ({children}) => {
 
                             <Link href="/">ES</Link>
                         </div>
-                        <div className="backdrop-blur-xl  border-drop bg-white/60 !bg-none rounded-lg p-2 font-bold hover:bg-white-blue">
+                        <div className="backdrop-blur-xl  border-drop bg-white  rounded-lg p-2 font-bold hover:bg-light-indigo">
 
                             <Link href="/history">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="1.1rem" height="1.1rem" fill="none"
-                                    viewBox="0 0 24 24">
-                                    <path stroke="currentColor" strokeLinecap="round"  strokeWidth="2"
-                                        d="M3 10v4m4.5-3v2M12 6v12m4.5-15v18M21 10v4"></path>
-                                </svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-audio-lines"><path d="M2 10v3"/><path d="M6 6v11"/><path d="M10 3v18"/><path d="M14 8v7"/><path d="M18 5v13"/><path d="M22 10v3"/></svg>
                             </Link>
                         </div>
 
                         <div className="backdrop-blur-xl  border-drop bg-white/60 !bg-none rounded-lg p-2 font-bold hover:bg-white-blue">
-                            <a href="">
+                            <Link href="/project">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="1.1rem" height="1.1rem" viewBox="0 0 20 20"
                                     fill="none" stroke="currentColor" strokeWidth="1.5"
                                     >
@@ -43,7 +39,7 @@ const Navigation = ({children}) => {
                                     </defs>
                                 </svg>
 
-                            </a>
+                            </Link>
                         </div>
 
                     </div>

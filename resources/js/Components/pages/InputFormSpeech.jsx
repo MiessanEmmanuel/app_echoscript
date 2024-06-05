@@ -100,7 +100,7 @@ const InputFormSpeech = ({ voices, onSubmit }) => {
 
                             /* onChange={(e) => setVoice(e.target.value)} */
                             required
-                            className="w-full rounded-lg shadow-lg border-ui-1 bg-white/60 focus:ring-0"
+                            className="w-full rounded-lg shadow-lg  bg-white/60 focus:ring-0"
                         >
                             <option value="">Select your voice</option>
                             {voices ? Object.entries(voices).map(([voice, value]) => (
@@ -116,7 +116,7 @@ const InputFormSpeech = ({ voices, onSubmit }) => {
                             name="format"
 
                             /* onChange={(e) => setFormat(e.target.value)} */
-                            className="w-full rounded-lg shadow-lg border-ui-1 bg-white/60 focus:ring-0"
+                            className="w-full rounded-lg shadow-lg  bg-white/60 focus:ring-0"
                         >
                             <option value="">Select your format</option>
                             <option value=""></option>
@@ -130,7 +130,7 @@ const InputFormSpeech = ({ voices, onSubmit }) => {
                         /* onChange={(e) => setText(e.target.value)} */
                         cols="30"
                         rows="10"
-                        className="w-full rounded-lg shadow-lg border-ui-1 bg-white/60 focus:ring-0"
+                        className="w-full rounded-lg shadow-lg  bg-white/60 focus:ring-0"
                         placeholder="Enter your text"
                     ></textarea>
                     <input type="file" name="file"  />

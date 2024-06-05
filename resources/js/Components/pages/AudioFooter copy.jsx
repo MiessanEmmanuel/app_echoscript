@@ -7,8 +7,8 @@ const AudioFooter = ({ data }) => {
     if (data != null) {
         // Définir la source audio avec les données base64
         audioFooter.src = 'data:audio/mpeg;base64,' + data;
-// Jouer l'audio
-audioFooter.play();
+        // Jouer l'audio
+        audioFooter.play();
     }
 
 
@@ -306,7 +306,7 @@ audioFooter.play();
                 </div>
             </div>
             <div className="flex items-center">
-                <span className="inline-block shadow-lg rounded-lg py-1 px-2 bg-white/60 hover:bg-white-blue border-ui-1">
+                <span className="inline-block shadow-lg rounded-lg py-1 px-2 bg-white/60 hover:bg-white-blue ">
                     <button type="button" className="">
                         <svg xmlns="http://www.w3.org/2000/svg" className="icon-play inline-block" width="1.2rem" height="1.2rem" viewBox="0 0 53.18 53.18">
                             <defs>

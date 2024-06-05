@@ -19,23 +19,35 @@ Route::get('/dashboard', function () {
 
 Route::middleware('auth')->group(function () {
     Route::get('/', [PagesController::class, 'index']);
+    Route::get('/baseui', [PagesController::class, 'UiBaseShow']);
     Route::get('/history', [PagesController::class, 'showHistory'])->name('HISTORY');
+
+
 
 
     Route::get('/project', [PagesController::class, 'showHomeProject'])->name('HOMEPROJECT');
     Route::post('/create-project', [ProjectController::class, 'add'])->name('ADD_PROJECT');
     Route::post('/edit-project', [ProjectController::class, 'edit'])->name('EDIT_PROJECT');
+    Route::post('/delete-project', [ProjectController::class, 'delete'])->name('project.delete');
+
 
     Route::get('/project/{id}/config', [PagesController::class, 'showConfigProjectOne'])->name('CONFIG_PROJECT');
     Route::get('/project/{id}', [PagesController::class, 'showProjectOne'])->name('PROJECT');
 
+    Route::get('/{id}-test-voice', [PagesController::class, 'showTestVoice'])->name('TestVoice');
+
+    Route::get('/project{id}/chapters-history', [PagesController::class, 'showChapterHistory'])->name('chapter-history');
     Route::post('/project/add-chapter',[ProjectController::class, 'addChapter'])->name('add-chapter');
     Route::post('/project/edit-chapter',[ProjectController::class, 'editChapter'])->name('edit-chapter');
     Route::post('/project/delete-chapter',[ProjectController::class, 'deleteChapter'])->name('delete-chapter');
     Route::post('/project/generate-chapter',[ProjectController::class, 'generateChapter'])->name('generate-chapter');
 
+
+
     Route::post('/text-to-speech', [TranscribedaudioController::class, 'generateTextAudio'])->name('text-to-speech');
     Route::post('/speech-to-speech', [TranscribedaudioController::class, 'generateSpeechAudio'])->name('speech-to-speech');
+    Route::get('/download-audio', [TranscribedaudioController::class, 'downloadAudio']);
+
 
     Route::get('/csrf-token', [PagesController::class, 'getCsrfToken'])->name('CsrfToken');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

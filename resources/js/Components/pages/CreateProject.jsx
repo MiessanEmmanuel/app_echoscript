@@ -2,25 +2,27 @@ export default function CreateProject({ isOpen, categories, voices, handleCloseM
     if (!isOpen) return null;
 
     // Récupérer le jeton CSRF depuis le serveur
-    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
 
     const handleSubmitCreateProject = (e) => {
         e.preventDefault();
-        const { name, description, category, voice, language } = e.target.elements;
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        const { title, description, category, voice, language } = e.target.elements;
         const project = {
-            name: name.value,
+            title: title.value,
             description: description.value,
             category: category.value,
             voice: voice.value,
             language: language.value,
+            title: title.value
 
         }
-        const formData = new FormData();
-        formData.append('name', name.value);
+      /*   const formData = new FormData();
+        formData.append('name', title.value);
         formData.append('description', description.value);
         formData.append('category', category.value);
         formData.append('voice', voice.value);
-        formData.append('language', language.value);
+        formData.append('language', language.value); */
 
 
         fetch('/create-project', {
@@ -35,9 +37,11 @@ export default function CreateProject({ isOpen, categories, voices, handleCloseM
             .then(data => {
                 if (data.status === 'success') {
                     console.log(data);
+                    handleCloseModalCreateProject();
                     window.location.href = '/projects';
                 } else {
                     console.log(data);
+                    handleCloseModalCreateProject()
                 }
             })
             .catch(error => console.log(error));
@@ -48,19 +52,19 @@ export default function CreateProject({ isOpen, categories, voices, handleCloseM
     return (
         <div className="fixed inset-0 z-50 bg-gray-600 bg-opacity-50 flex justify-center items-center">
             <form className="w-2/5" onSubmit={handleSubmitCreateProject}>
-                <div className="bg-[#fafcfc] p-6 rounded-lg shadow-lg w-full border-ui-1">
+                <div className="bg-[#fafcfc] p-6 rounded-lg shadow-lg w-full ">
                     <h2 className="text-xl font-bold mb-4">Create Project</h2>
                     <div className="mb-4">
                         <label className="block text-gray-700">Name Project</label>
-                        <input type="text" name="name" className="w-full" /* onChange={(e) => { fixStability(e.target.value) }} */ />
+                        <input type="text" name="title" className="w-full" required /* onChange={(e) => { fixStability(e.target.value) }} */ />
                     </div>
                     <div className="mb-4">
                         <label className="block text-gray-700">Description</label>
-                        <input type="text" name="description" className="w-full" /* onChange={(e) => { fixSimilarity(e.target.value) }} */ />
+                        <input type="text" name="description" className="w-full" required /* onChange={(e) => { fixSimilarity(e.target.value) }} */ />
                     </div>
                     <div className="mb-4">
                         <label className="block text-gray-700">Default Voice</label>
-                        <select name="voice" className="w-full" /* onChange={(e) => { fixSpeakerBoost(e.target.value) }} */>
+                        <select name="voice" className="w-full" required /* onChange={(e) => { fixSpeakerBoost(e.target.value) }} */>
                             <option value="">Select voice</option>
                             {Object.entries(voices).map(([voice, value]) => (
                                 <option key={voice} value={value}>
@@ -71,7 +75,7 @@ export default function CreateProject({ isOpen, categories, voices, handleCloseM
                     </div>
                     <div className="mb-4">
                         <label className="block text-gray-700">Language</label>
-                        <select name="language" id="" className="w-full" /* onChange={(e) => { fixSpeakerBoost(e.target.value) }} */>
+                        <select name="language" id="" className="w-full" required /* onChange={(e) => { fixSpeakerBoost(e.target.value) }} */>
                             <option value="">Select language</option>
                             <option value="Fr">Fr</option>
                             <option value="En">En</option>
@@ -79,7 +83,7 @@ export default function CreateProject({ isOpen, categories, voices, handleCloseM
                         </select>
                     </div>
                     <div className="mb-4">
-                        <label className="block text-gray-700">Category</label>
+                        <label className="block text-gray-700" required>Category</label>
                         <select name="category" id="" className="w-full" /* onChange={(e) => { fixSpeakerBoost(e.target.value) }} */>
                             <option value="">Select Category</option>
                             {categories.map((category) => (

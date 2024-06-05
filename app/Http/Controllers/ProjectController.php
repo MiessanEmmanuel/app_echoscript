@@ -24,37 +24,41 @@ class ProjectController extends Controller
     public function add(Request $request)
     {
 
-        $title = $request->input('name');
+        $validated = $request->validate([
+            'title' => 'required|string|max:204',
+            'description' => 'required|string',
+            'language' => 'string',
+            'voice' => 'string',
+        ]);
+
+
+        //str_replace(' ','-', $title)
+        $title = $request->input('title');
         $description = $request->input('description');
         $introduction = 'rien';
         $category_id = $request->input('category');
         $voice = $request->input('voice');
         $language = $request->input('language');
 
-        /* return response()->json([
-           'voice' => $title,
-           'introduction' => $category_id,
 
-    ]);
- */
         $project = new Project;
 
         $project->title = $title;
         $project->description = $description;
         $project->introduction = $introduction;
-        $project->category_id = $category_id;
+        $project->category_id = 1;
         $project->default_voice = $voice;
         $project->language = $language;
 
         $project->user_id = Auth::id();
-        $project->save();
-        return response()->json('Sucess');
 
-        /* try {
+
+        try {
             $project->save();
         } catch (\Throwable $th) {
             return $th;
-        } */
+        }
+        return response()->json('Success');
 
         /*
         if () {
@@ -67,19 +71,31 @@ class ProjectController extends Controller
     public function edit(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string',
+            'title_project' => 'required|string',
         ]);
         $id_auth = Auth::id();
         $name_project = $request->input('title_project');
-        $project_id = $request->input('title_project');
+        $project_id = $request->id;
 
         $project = Project::where('id', $project_id)->where('user_id', $id_auth);
-        $project->update(['title' => $name_project]);
 
-        return response()->json('succes');
+        if ($project->update(['title' => $name_project])) {
+            return response()->json([
+                'message' => 'Project updated successfully',
+                'newNameProject' => $name_project
+            ]);
+        }
+        return response()->json('error');
     }
-    public function delete()
+    public function delete(Request $request)
     {
+        $id_project = $request->input('id_project');
+        $id_auth = Auth::id();
+        $project = Project::where('id', $id_project)->where('user_id', $id_auth);
+        if ($project->delete()) {
+            return response()->json('Success');
+        }
+        return response()->json('error');
     }
     public function addChapter(Request $request)
     {
@@ -111,6 +127,7 @@ class ProjectController extends Controller
         foreach ($validated['chapters'] as $index => $chapterData) {
             $chapterCount_loop = $chapterCount + $index + 1;
             $project->chapters()->create([
+                'slug'  => 'g',
                 'chapter_number' => $chapterCount_loop,
                 'chapter_title' => $chapterData['title'],
                 'chapter_text' => $chapterData['text'],
@@ -119,6 +136,10 @@ class ProjectController extends Controller
         return response()->json('success');
     }
 
+    /**
+     * Generer l'audio du chapitre par l'api
+     * @var object $request
+     */
     public function generateChapter(Request $request)
     {
         /*
@@ -154,6 +175,7 @@ speakerBoost
         $style = $validated['style'];
         $speakerBoost = $validated['speakerBoost'];
 
+
         //Récupérer le projet
         $project = Project::find($project_id);
         if (!$project) {
@@ -164,6 +186,8 @@ speakerBoost
         if (!$chapter) {
             return response()->json('Chapter not found', 404);
         }
+
+        if(empty($voice)) $voice = $project->default_voice ;
 
         //Générer le fichier audio
         $key = env('ELEVENLABS_API_KEY'); // à mettre dans le fichier .env
@@ -203,15 +227,15 @@ speakerBoost
             //Stoker l'audio dans Le S3 et dans la base donnée
 
             //upload le fichier audio sur S3
-            if(empty($chapter->slug)) $chapter->slug = $chapter->chapter_title;
-            $audioFileName = Auth::user()->name . '-' .str_replace(' ', '-', $chapter->slug) . '.mp3';
+            if (empty($chapter->slug)) $chapter->slug = $chapter->chapter_title;
+            $audioFileName = Auth::user()->name . '-' . str_replace(' ', '-', $chapter->slug) . '.mp3';
             //creeer un chapter_slug pour ne pas que losqure le user modifie son nom de chapitre, on ait affaire à un autre fichier audio
-            $audioFilePath = 'public/audios/' . Auth::user()->name . '/projects/' .$project->id .'/chapter_'. $chapter->chapter_number .'/'. $audioFileName;
+            $audioFilePath = 'public/audios/' . Auth::user()->name . '/projects/' . $project->id . '/chapter_' . $chapter->chapter_number . '/' . $audioFileName;
             $options_aws = [
                 'visibility' => 'public',
             ];
 
-            Storage::disk('s3')->put($audioFilePath, base64_decode($base64Audio) ,  $options_aws);
+            Storage::disk('s3')->put($audioFilePath, base64_decode($base64Audio),  $options_aws);
 
             //stocker l'audio dans la base de données
             $chapter->chapter_text = $chapter_text;
@@ -230,12 +254,45 @@ speakerBoost
         }
     }
 
-    public function editChapter()
+    /**
+     * Editer le titre, la categorie
+     * @var object $request
+     */
+    public function editChapter(Request $request)
     {
+        $chapter = ChapterProject::find($request->chapter_id);
+
+        $chapter_text = $request->chapter_title;
+        /* $chapter->category = $request->category; */
+        $chapter->save();
     }
-    public function deleteChapter()
+
+    /**
+     * Supprimer le chapitre et ordonner le nombre de chaptitre
+     * Si on supprime le quatrième chapitre, le cinquième devient le quatrième
+     * @var object $request
+     */
+    public function deleteChapter(Request $request)
     {
+        $chapter = ChapterProject::find($request->chapter_id);
+        $project = Project::find($chapter->project_id);
+        $chapter_number = $chapter->chapter_number;
+        $chapters = ChapterProject::where('project_id', $project->id)->where('
+        chapter_number', '>', $chapter_number)->get();
+
+        foreach ($chapters as $chapter) {
+            $chapter->chapter_number = $chapter->chapter_number - 1;
+            $chapter->save();
+        }
+
+        if ($chapter->delete()) {
+
+            return response()->json(['message' => 'Chapitre supprimé avec succès']);
+        } else {
+            return response()->json(['message' => 'Erreur lors de la suppression du chapitre']);
+        }
     }
+
     /* private function uploadDbAudio($message, $voice, $lien, $category, $stability, $similarity_boost, $style, $use_speaker_boost, $user_id)
     {
 
