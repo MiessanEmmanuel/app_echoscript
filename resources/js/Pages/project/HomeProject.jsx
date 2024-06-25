@@ -1,35 +1,16 @@
-import { Link, Head } from '@inertiajs/react';
+import { Link, Head, usePage, router } from '@inertiajs/react';
 import Navigation from '@/Layouts/Navigation';
 import ProjectShow from '@/Components/pages/ProjectShow';
 import Header from '@/Components/pages/Header';
 import CreateProject from '@/Components/pages/CreateProject';
-import { useState,useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import AanimateWriteText from '@/Components/text/AnimateWriteText';
 import Pagination from '@/Components/pages/Pagination';
 import PrimaryButton from '@/Components/PrimaryButton';
 import Modal from '@/Components/Modal';
 
-export default function HomeProject({ projects, categories, voices }) {
-    console.log(projects);
-    const [projectsLocal, setProjects] = useState(projects || [])
-
-    useEffect(() => {
-        setProjects(projects || []);
-      }, [projects]);
-      /* const [articles, setArticles] = useState([]);
-
-      useEffect(() => {
-          // Remplacez cette partie par votre logique de récupération des articles depuis la base de données
-          const fetchArticles = async () => {
-              const response = await fetch('/api/articles'); // Exemple d'appel API
-              const data = await response.json();
-              setArticles(data);
-          };
-
-          fetchArticles();
-      }, []);
- */
-
+export default function HomeProject({ categories, voices }) {
+    const { projects } = usePage().props;
 
     const [openModalCreateProject, setOpenModalCreateProject] = useState(false);
     const [valueShowModalRenameP, setValueShowModalRenameP] = useState(false);
@@ -51,9 +32,9 @@ export default function HomeProject({ projects, categories, voices }) {
 
 
     //Modal Rename  project
-    const showModalRenameProject = (idProject) => {
+    const showModalRenameProject = (projectRename) => {
         setValueShowModalRenameP(true)
-        setProjectModalCurrent(idProject)
+        setProjectModalCurrent(projectRename)
 
     };
     const CloseModalRenameProject = () => {
@@ -61,10 +42,10 @@ export default function HomeProject({ projects, categories, voices }) {
         setProjectModalCurrent(null)
     };
 
-    // Modal delete Project
-    const showModalDeleteProject = (idProject) => {
+    // --Modal delete Project
+    const showModalDeleteProject = (projectDelete) => {
         setValueShowModalDeleteP(true)
-        setProjectModalCurrent(idProject)
+        setProjectModalCurrent(projectDelete)
 
     };
 
@@ -75,65 +56,38 @@ export default function HomeProject({ projects, categories, voices }) {
 
 
     const handleChangeNameAndCategoryProject = () => {
+        router.post(`/edit-project`, {
+            id: projectModalCurrent.id,
+            title_project: titleProjectCurrentModified,
+        }, {
+            onSuccess: () => {
+                CloseModalRenameProject();
 
-        fetch('/edit-project', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
             },
-            body: JSON.stringify({
-                id: projectModalCurrent,
-                title_project: titleProjectCurrentModified,
-                /* category: 'new category', */
-            }),
+            onError: (errors) => {
+                console.error('Failed to update project name:', errors);
+            }
+        });
+    }
 
-        })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(errData => {
-                        throw new Error(errData.message || 'Unknown error');
-                    });
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log(data);
-                setValueShowModalRenameP(false)
-            })
-            .catch(error => console.log(error));
 
+
+    const handleDeleteProject = () => {
+        router.post(`/delete-project`, {
+            id_project: projectModalCurrent.id,
+        }, {
+            onSuccess: () => {
+                CloseModalDeleteProject();
+            },
+            onError: (errors) => {
+                console.error('Failed to delete project :', errors);
+            }
+        });
 
     }
-    const handleDeleteProject = () => {
 
-        fetch('/delete-project', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            },
-            body: JSON.stringify({
-                id_project: projectModalCurrent,
-            }),
-
-        })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(errData => {
-                        throw new Error(errData.message || 'Unknown error');
-                    });
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log(data);
-                setValueShowModalDeleteP(false)
-                setProjects(projects.filter(project => project.id !== projectModalCurrent));
-            })
-            .catch(error => console.log(error));
-
-
+    const handleReloadProject = () => {
+        router.reload({ only: ['projects'] })
     }
 
     // pagination
@@ -141,13 +95,13 @@ export default function HomeProject({ projects, categories, voices }) {
     const [itemsPerPageHistory, setItemsPerPageHistory] = useState(4);
     const startIndex = (page - 1) * itemsPerPageHistory;
     const endIndex = startIndex + itemsPerPageHistory;
-    const displayedChapters = projectsLocal.slice(startIndex, endIndex);
+    const displayedProjects = projects.slice(startIndex, endIndex);
 
 
     return (
         <>
             <Head title='Project' />
-            <CreateProject isOpen={openModalCreateProject} categories={categories} voices={voices} handleCloseModalCreateProject={handleCloseModalCreateProject} />
+            <CreateProject isOpen={openModalCreateProject} categories={categories} voices={voices} handleCloseModalCreateProject={handleCloseModalCreateProject} handleReloadProject={handleReloadProject} />
             <Navigation >
                 <div className="lg:pl-[4em] pl-0 min-h-screen section-heros">
                     <div className='relative  z-10'>
@@ -171,13 +125,13 @@ export default function HomeProject({ projects, categories, voices }) {
                                 </div>
                                 <div className='grid grid-cols-2 gap-x-6 gap-y-7 px-6 py-4 max-h-[600px] overflow-y-scroll'>
 
-                                    {displayedChapters ? Object.entries(displayedChapters).map(([key, project]) => (
+                                    {displayedProjects ? Object.entries(displayedProjects).map(([key, project]) => (
                                         <ProjectShow project={project} showModalRenameProject={showModalRenameProject} showModalDeleteProject={showModalDeleteProject} key={key} />
 
                                     )) : <div >No voices available</div>}
 
                                 </div>
-                                <Pagination className="bg-white rounded-b-xl" objects ={projects} page={page} setPage ={setPage} itemsPerPageHistory={itemsPerPageHistory} />
+                                <Pagination className="bg-white rounded-b-xl" objects={projects} page={page} setPage={setPage} itemsPerPageHistory={itemsPerPageHistory} />
                             </div>
 
                         </div>
@@ -185,10 +139,15 @@ export default function HomeProject({ projects, categories, voices }) {
 
                 </div >
                 <Modal show={valueShowModalRenameP} maxWidth='lg' >
-                    <div className='w-[90%] mx-auto p-6'>
-                        <div className='mb-6'>
+
+                    <div className='w-[90%] mx-auto px-6 py-5'>
+                        <div className='text-2xl mb-3 font-bold'>
+                            Rename "{projectModalCurrent ? projectModalCurrent.title : ""}"
+                        </div>
+                        <div className='mb-8'>
                             <input type="text"
                                 placeholder='Project Name'
+                                aria-valuetext={projectModalCurrent ? projectModalCurrent.title : ""}
                                 required
                                 className='w-full mx-auto block bg-indigo-100  rounded-lg'
                                 onChange={(e) => {
@@ -196,7 +155,7 @@ export default function HomeProject({ projects, categories, voices }) {
                                 }
                                 }></input>
                         </div>
-                        <div className='flex justify-between space-x-8'>
+                        <div className='flex justify-between space-x-8 '>
                             <button onClick={CloseModalRenameProject} className='w-full bg-slate-900 text-slate-100'>
                                 Close
                             </button>
@@ -218,11 +177,10 @@ export default function HomeProject({ projects, categories, voices }) {
                             <button onClick={CloseModalDeleteProject} className='w-full bg-slate-900 text-slate-100'>
                                 No
                             </button>
-                            <button onClick={handleDeleteProject} className={`${titleProjectCurrentModified == '' ? 'opacity-50 hover:bg-red-600' : ''}  w-full bg-red-600 hover:bg-red-700 hover:text-white text-slate-100`}>
+                            <button onClick={handleDeleteProject} className={` w-full bg-red-600 bg-red-300 hover:bg-red-700 hover:text-white text-slate-100`}>
                                 Delete
                             </button>
                         </div>
-
                     </div>
 
 

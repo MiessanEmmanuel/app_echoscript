@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 import SettingsVoice from '../SettingsVoice';
 import PrimaryButton from '../PrimaryButton';
 import SelectFormUi from '@/Components/forms/SelectFormUi'
+import { router, usePage } from '@inertiajs/react';
 /**
  * Composant InputForm qui prend en paramètres voices, character et onSubmit.
  *
@@ -9,7 +11,8 @@ import SelectFormUi from '@/Components/forms/SelectFormUi'
  * @param {number} character - Le nombre maximum de caractères autorisés dans la zone de texte.
  * @param {function} onSubmit - Une fonction de callback pour gérer la soumission du formulaire.
  */
-const InputForm = ({ voices, onSubmit }) => {
+const InputForm = ({ voices, onSubmit, validatedUpdatedSettingsVoices }) => {
+    const { project } = usePage().props
     /**
     * Variable d'état pour stocker les  paramètre du formulaire.
     */
@@ -17,7 +20,6 @@ const InputForm = ({ voices, onSubmit }) => {
     const [selectedVoice, setSelectedVoice] = useState('Voices...');
 
 
-    const [format, setFormat] = useState('');
     const [text, setText] = useState('');
     const [loading, setLoading] = useState(false);
 
@@ -38,13 +40,9 @@ const InputForm = ({ voices, onSubmit }) => {
     };
 
 
-    // Récupérer le jeton CSRF depuis le serveur
-    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-
 
     /**
      * Fonction asynchrone pour suspendre l'exécution pendant un temps spécifié.
-     *
      * @param {number} ms - Le temps en millisecondes pour suspendre l'exécution.
      */
     async function sleep(ms) {
@@ -56,9 +54,8 @@ const InputForm = ({ voices, onSubmit }) => {
      *
      * @param {object} e - L'objet événement déclenché par la soumission du formulaire.
      */
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-
 
         /**
         * Récupère les valeurs du texte saisi et de la voix sélectionnée ainsi que les autres paramètre selectioné dans le formulaire.
@@ -74,34 +71,55 @@ const InputForm = ({ voices, onSubmit }) => {
         /**
          * Fait une requête POST vers l'endpoint /text-to-speech avec le texte saisi et la voix sélectionnée.
          */
-        fetch('/text-to-speech', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': csrfToken,
-                'Accept': 'application/json',
-            },
-            body: JSON.stringify({ text: texte, voice: voice, stability: stability, similarity_boost: similarity, style: style, use_speaker_boost: speakerBoost })
-        })
-            .then(response => response.json())
-            .then(data => {
-                console.log(data);
-                onSubmit(data.audio);
-                /* // Définir la source audio avec les données base64
-                audioFooter.src = 'data:audio/mpeg;base64,' + data.audio;
+        try {
+            const response = await axios.post(`/text-to-speech`, {
+                text: texte,
+                voice: voice,
+                stability: stability,
+                similarity_boost: similarity,
+                style: style,
+                use_speaker_boost: speakerBoost
+            });
 
-                // Jouer l'audio
-                audioFooter.play(); */
-            })
-            .catch(error => console.error('Erreur:', error));
+            onSubmit(response.data.audio);
+            /* // Définir la source audio avec les données base64
+            audioFooter.src = 'data:audio/mpeg;base64,' + response.data.audio;
 
+            // Jouer l'audio
+            audioFooter.play(); */
+        } catch (error) {
+            console.error('Erreur:', error.response.data);
+        }
         setLoading(false);
     }
 
-    // Récupérer le jeton CSRF lors du montage du composant
-    /*  React.useEffect(() => {
-         fetchCsrfToken();
-     }, []); */
+    /**
+     * Valider les paramètres de voix
+    */
+    const handleUpdateVoicesSettings = async () => {
+
+        /**
+         * Fait une requête POST vers l'endpoint /text-to-speech avec le texte saisi et la voix sélectionnée.
+         */
+        try {
+            const response = await axios.post(`/${project.id}-test-voice`, {
+                stability: stability,
+                similarity_boost: similarity,
+                style: style,
+                use_speaker_boost: speakerBoost
+            });
+
+            console.log(response.data);
+
+        } catch (error) {
+            console.error('Erreur:', error.response.data);
+        }
+
+    }
+    if (validatedUpdatedSettingsVoices == true) {
+        handleUpdateVoicesSettings();
+        validatedUpdatedSettingsVoices = false;
+    }
     return (
         <div className="my-6 w-[80%] mx-auto">
             {/* <div className="font-bold my-5 text-xl">
@@ -138,7 +156,7 @@ const InputForm = ({ voices, onSubmit }) => {
                                 )) : <option disabled>No voices available</option>}
 
                             </select> */}
-                            <SelectFormUi voices={voices}  setSelectedVoice={setSelectedVoice} />
+                            <SelectFormUi voices={voices} setSelectedVoice={setSelectedVoice} />
                         </div>
                         <div className="" >
                             {/* <button
@@ -149,8 +167,10 @@ const InputForm = ({ voices, onSubmit }) => {
                             >
                                 Settings
                             </button> */}
-                            <button id="voiceSelect" onClick={handleShowSettings} type='button'  className=" bg-degrate-ui inline-flex items-center px-4 py-2  border border-transparent rounded-md font-bold text-xs text-white uppercase tracking-widest  focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 opacity-3 !rounded-3xl !py-4 !m-0 border font-bold  shadow-xl focus:ring-0 hover:ring-0 !block !text-md"><span className='block text-center'>Settings</span></button>
-                            <SettingsVoice isOpen={isModalOpen} handleClose={handleCloseModal} fixStability={setStability} fixSimilarity={setSimilarity} fixStyle={setStyle} fixSpeakerBoost={setSpeakerBoost} />
+                            <button id="voiceSelect" onClick={handleShowSettings} type='button' className=" bg-degrate-ui inline-flex items-center px-4 py-2  border border-transparent rounded-md font-bold text-xs text-white uppercase tracking-widest  focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 opacity-3 !rounded-3xl !py-4 !m-0 border font-bold  shadow-xl focus:ring-0 hover:ring-0 !block !text-md"><span className='block text-center'>Settings</span></button>
+                            <SettingsVoice isOpen={isModalOpen} handleClose={handleCloseModal} fixStability={setStability} fixSimilarity={setSimilarity} fixStyle={setStyle} fixSpeakerBoost={setSpeakerBoost}
+                            stability={stability} similarity={similarity} style={style} speakerBoost={speakerBoost}
+                                 />
 
                         </div>
                     </div>
@@ -161,21 +181,21 @@ const InputForm = ({ voices, onSubmit }) => {
                     </div>
                 </div>
 
-                 <PrimaryButton className='w-full mx-auto py-3 !bg-gray-600'  type="submit">
+                <PrimaryButton className='w-full mx-auto py-3 !bg-gray-600' type="submit">
                     <span className='block  mx-auto'>
-                    Generate <svg
-                        className={`inline-block mx-3 ${loading ? 'block' : 'hidden'}`}
-                        id="spinner-icon"
-                        width="24"
-                        height="24"
-                        fill="#fff"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                    >
+                        Generate <svg
+                            className={`inline-block mx-3 ${loading ? 'block' : 'hidden'}`}
+                            id="spinner-icon"
+                            width="24"
+                            height="24"
+                            fill="#fff"
+                            viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg"
+                        >
 
-                    </svg>
+                        </svg>
                     </span>
-                   </PrimaryButton>
+                </PrimaryButton>
                 {/* <button
                     type="submit"
                     className="bg-blackblue hover:bg-blackblue/50 w-full text-white px-4 py-2 rounded-xl shadow-lg"

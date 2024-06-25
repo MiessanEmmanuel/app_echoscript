@@ -15,12 +15,21 @@ use League\Flysystem\AwsS3V3\PortableVisibilityConverter;
 
 class ProjectController extends Controller
 {
+    /**
+     * Affiche les project d'un utilisateur en particulier
+     * @var int $id
+     */
     public function showProject($id)
     {
         if (empty($id)) $id = Auth::id();
         $projects_user = Project::findOrFail($id);
         return $projects_user;
     }
+
+    /**
+     * Ajoute un projet aux projets de l'utilisateur
+     * @var object $request
+     */
     public function add(Request $request)
     {
 
@@ -68,6 +77,10 @@ class ProjectController extends Controller
         } */
     }
 
+    /**
+     * Renomme un projet
+     * @var object $request
+     */
     public function edit(Request $request)
     {
         $validated = $request->validate([
@@ -75,31 +88,59 @@ class ProjectController extends Controller
         ]);
         $id_auth = Auth::id();
         $name_project = $request->input('title_project');
-        $project_id = $request->id;
+        $project_id = $request->input('id');
 
         $project = Project::where('id', $project_id)->where('user_id', $id_auth);
 
         if ($project->update(['title' => $name_project])) {
-            return response()->json([
-                'message' => 'Project updated successfully',
-                'newNameProject' => $name_project
-            ]);
+            return to_route('project');
         }
-        return response()->json('error');
+        return to_route('project');
     }
+
+    /**
+     * Supprime un projet
+     * @var object $request
+     */
     public function delete(Request $request)
     {
         $id_project = $request->input('id_project');
         $id_auth = Auth::id();
         $project = Project::where('id', $id_project)->where('user_id', $id_auth);
         if ($project->delete()) {
-            return response()->json('Success');
+            return to_route('project')->withViewData(['success' => 'Project successfully withdrawn']);
         }
-        return response()->json('error');
+        return to_route('project')->withViewData(['error' => 'Failed to delete project']);
+        //--rediriger vers  project avec un message de succes envoye au composant react via inertia
+
+
     }
+
+     /**
+     * Sauvegarder le paramètre de voix du projet
+     * @var object $request
+     */
+    public function UpdateConfigVoiceParameter(Request $request)
+    {
+        $stability = $request->input('stability');
+        $similarity_boost = $request->input('similarity_boost');
+        $style = $request->input('style');
+        $use_speaker_boost = $request->input('use_speaker_boost');
+        $project_id = $request->id;
+        $id_auth = Auth::id();
+
+
+        //--- Uploader maintenant
+        return response()->json('success');
+    }
+
+    /**
+     * Ajoute un Chapitre aux projet
+     * @var object $request
+     */
     public function addChapter(Request $request)
     {
-        //validation du formulaire
+        //--Validation du formulaire
         $validated = $request->validate([
             'project_id' => 'required|exists:projects,id',
             'introduction' => 'required|string',
@@ -114,16 +155,16 @@ class ProjectController extends Controller
             return response()->json(['error' => 'Project not found'], 404);
         }
 
-        //Uploader l'introduction
+        //--Uploader l'introduction
         $introduction = $validated['introduction'];
         $project->update([
             'introduction' => $introduction,
         ]);
 
-        //recuperer le nombre de chapitre du projet
+        //--recuperer le nombre de chapitre du projet
         $chapterCount = ChapterProject::where('project_id', $project_id)->count();
 
-        //Uploader les chapitres
+        //--Uploader les chapitres
         foreach ($validated['chapters'] as $index => $chapterData) {
             $chapterCount_loop = $chapterCount + $index + 1;
             $project->chapters()->create([
@@ -133,7 +174,8 @@ class ProjectController extends Controller
                 'chapter_text' => $chapterData['text'],
             ]);
         }
-        return response()->json('success');
+
+        return to_route('testVoice')->withViewData(['success' => 'Chapters successfully added']);
     }
 
     /**
@@ -142,17 +184,7 @@ class ProjectController extends Controller
      */
     public function generateChapter(Request $request)
     {
-        /*
-    project_id
-chapter_id
-chapter_text
-langue
-voice
-stability
-similarity
-style
-speakerBoost
-        */
+
         $validated = $request->validate([
             'project_id' => 'required|integer',
             'chapter_id' => 'required|integer',
@@ -187,7 +219,7 @@ speakerBoost
             return response()->json('Chapter not found', 404);
         }
 
-        if(empty($voice)) $voice = $project->default_voice ;
+        if (empty($voice)) $voice = $project->default_voice;
 
         //Générer le fichier audio
         $key = env('ELEVENLABS_API_KEY'); // à mettre dans le fichier .env
@@ -260,11 +292,16 @@ speakerBoost
      */
     public function editChapter(Request $request)
     {
-        $chapter = ChapterProject::find($request->chapter_id);
 
-        $chapter_text = $request->chapter_title;
+        $chapter = ChapterProject::findOrFail($request->chapter_id);
+
+        $response = $chapter->update([
+            'chapter_title' => $request->chapter_title,
+        ]);
         /* $chapter->category = $request->category; */
-        $chapter->save();
+
+
+        return response()->json('succes');
     }
 
     /**
@@ -277,8 +314,7 @@ speakerBoost
         $chapter = ChapterProject::find($request->chapter_id);
         $project = Project::find($chapter->project_id);
         $chapter_number = $chapter->chapter_number;
-        $chapters = ChapterProject::where('project_id', $project->id)->where('
-        chapter_number', '>', $chapter_number)->get();
+        $chapters = ChapterProject::where('project_id', $project->id)->where('chapter_number', '>', $chapter_number)->get();
 
         foreach ($chapters as $chapter) {
             $chapter->chapter_number = $chapter->chapter_number - 1;
@@ -292,6 +328,7 @@ speakerBoost
             return response()->json(['message' => 'Erreur lors de la suppression du chapitre']);
         }
     }
+
 
     /* private function uploadDbAudio($message, $voice, $lien, $category, $stability, $similarity_boost, $style, $use_speaker_boost, $user_id)
     {

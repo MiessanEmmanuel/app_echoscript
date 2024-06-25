@@ -20,11 +20,11 @@ export default function ProjectShow({ project, showModalRenameProject, showModal
     };
 
     const showModalDeleteProjectLocal = () => {
-        showModalDeleteProject(project.id)
+        showModalDeleteProject(project)
     }
 
     const showModalRenameProjectLocal = () => {
-        showModalRenameProject(project.id);
+        showModalRenameProject(project);
     }
 
 
@@ -44,7 +44,7 @@ export default function ProjectShow({ project, showModalRenameProject, showModal
 
             </div>
             <div className="px-6 py-4 ">
-                <span className="text-lg pb-1 block font-bold capitalize text-indigo-900">{titleProject}</span>
+                <span className="text-lg pb-1 block font-bold capitalize text-indigo-900">{project.title}</span>
                 <p className="text-sm font-thin text-gray-500">
                     { truncateText(project.description, 300)}
                 </p>

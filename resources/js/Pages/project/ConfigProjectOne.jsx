@@ -1,41 +1,50 @@
 import React, { useState, useEffect } from 'react';
-import { Link, Head } from '@inertiajs/react';
+import { Link, Head, router } from '@inertiajs/react';
 import Navigation from '@/Layouts/Navigation';
 import Header from '@/Components/pages/Header';
 import CreateProject from '@/Components/pages/CreateProject';
 import Checkbox from "@/Components/Checkbox";
 import PrimaryButton from '@/Components/PrimaryButton';
 import IconDelete from '@/Components/Icons/IconDelete';
-/* import '/resources/css/style.css';*/
-/* import '/resources/css/livre.css'; */
+/* import '/public/cssPythonC/style.css';
+import '/public/cssPythonC/livre.css'; */
 
 
 const ConfigProjectOne = ({ project }) => {
-    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-    const [numberChapter, setNumberChapter] = useState(1);
+
     const [chapters, setChapters] = useState([{ id: 0, title: '', text: '' }]);
+    const [numberChapter, setNumberChapter] = useState(1);
 
     const addChapter = () => {
-        setNumberChapter(prevNumber => prevNumber + 1);
+        setNumberChapter(chapters.length + 1);
+        console.log(numberChapter);
+        setChapters(
+            [...chapters, {
+                id: numberChapter, title: '', text
+                    : ''
+            }]
+        );
     };
 
-    useEffect(() => {
-
-        const newChapters = [];
-        for (let index = 0; index < numberChapter; index++) {
-            newChapters.push({ id: index, title: '', text: '' });
-        }
+  const deleteChapter = (id) => {
+    // tous les chapitre suivant doivent suivre cet exemple ( ex: chapitre 4 devient chapitre 3 si le chapitre 3 à été supprimé)
+    const newChapters = chapters.filter((chapter) => chapter.id !== id);
+    newChapters.forEach((chapter, index) => {
+        chapter.id = index;
+        });
+        setNumberChapter(chapters.length - 1);
         setChapters(newChapters);
-    }, [numberChapter]);
+    };
+
 
     const handleChange = (index, field, value) => {
-        const newChapters = [...chapters];
-        newChapters[index][field] = value;
-        setChapters(newChapters);
+        const Chapters = [...chapters];
+        Chapters[index][field] = value;
+        setChapters(Chapters);
     };
 
 
-    // csrfToken
+
 
 
 
@@ -43,36 +52,20 @@ const ConfigProjectOne = ({ project }) => {
 
         e.preventDefault();
 
-
-
-        fetch('/project/add-chapter', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': csrfToken,
-                'Accept': 'application/json',
+        router.post(`/project/add-chapter`, {
+            project_id: project.id,
+            introduction: e.target.introduction.value,
+            chapters: chapters
+        }, {
+            onSuccess: () => {
+                console.log('success');
             },
-            body: JSON.stringify({
-                project_id: project.id,
-                introduction: e.target.introduction.value,
-                chapters: chapters
-            }),
-        })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(errData => {
-                        throw new Error(errData.message || 'Unknown error');
-                    });
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log(data);
-            })
-            .catch(error => console.log(error));
+            onError: (errors) => {
+                console.error('Failed to delete project :', errors);
+            }
+        });
+
     };
-
-
 
     return (
 
@@ -105,12 +98,12 @@ const ConfigProjectOne = ({ project }) => {
                                         </div>
                                     </div>
                                     {chapters.map((chapter, index) => (
-                                        <div key={chapter.id} className='my-4'>
+                                        <div key={index} className='my-4'>
                                             <div className='bg-blue-900 w-full flex justify-between  items-center'>
                                                 <button type='button' className=" block p-6 uppercase !text-start z-10 !shadow-none !rounded-none !text-white  ">
                                                     Chapter {chapter.id + 1}
                                                 </button>
-                                                <button type='button' className=" block bg-red-500 hover:bg-red-800 !text-white/60 uppercase px-3 ring-red-700 !text-start z-10 !shadow-none !rounded-md mx-3">
+                                                <button type='button' onClick={() =>deleteChapter(index)} className=" block bg-red-500 hover:bg-red-800 !text-white/60 uppercase px-3 ring-red-700 !text-start z-10 !shadow-none !rounded-md mx-3">
                                                     Delete <IconDelete className='!size-4 !inline-block' />
                                                 </button>
 

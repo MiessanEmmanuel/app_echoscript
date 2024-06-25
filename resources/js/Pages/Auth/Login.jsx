@@ -34,14 +34,15 @@ export default function Login({ status, canResetPassword }) {
 
             <form onSubmit={submit}>
                 <div>
-                    <InputLabel htmlFor="email" value="Email" />
+                    <InputLabel htmlFor="email" value="Email"  />
 
                     <TextInput
                         id="email"
                         type="email"
+                        placeholder="Email"
                         name="email"
                         value={data.email}
-                        className="mt-1 block w-full"
+                        className="p-3 mt-1 rounded-xl border bg-slate-100 py-2 w-full"
                         autoComplete="username"
                         isFocused={true}
                         onChange={(e) => setData('email', e.target.value)}
@@ -57,8 +58,10 @@ export default function Login({ status, canResetPassword }) {
                         id="password"
                         type="password"
                         name="password"
+                        placeholder="Password"
+
                         value={data.password}
-                        className="mt-1 block w-full"
+                        className="p-3 mt-1 rounded-xl border bg-slate-100 py-2 w-full"
                         autoComplete="current-password"
                         onChange={(e) => setData('password', e.target.value)}
                     />

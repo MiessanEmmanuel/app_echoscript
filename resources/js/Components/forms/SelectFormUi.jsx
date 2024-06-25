@@ -74,6 +74,7 @@ export default function SelectFormUi({ voices, setSelectedVoice, className='' })
 
     const voices_choices = []
 
+
     //ajouter des dictionnaire au tableaux voices_choices à chaque iterations
     const len_voices = Object.keys(voices).length;
 

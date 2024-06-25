@@ -1,7 +1,5 @@
-export default function CreateProject({ isOpen, categories, voices, handleCloseModalCreateProject}) {
+export default function CreateProject({ isOpen, categories, voices, handleCloseModalCreateProject,handleReloadProject }) {
     if (!isOpen) return null;
-
-    // Récupérer le jeton CSRF depuis le serveur
 
 
     const handleSubmitCreateProject = (e) => {
@@ -17,12 +15,12 @@ export default function CreateProject({ isOpen, categories, voices, handleCloseM
             title: title.value
 
         }
-      /*   const formData = new FormData();
-        formData.append('name', title.value);
-        formData.append('description', description.value);
-        formData.append('category', category.value);
-        formData.append('voice', voice.value);
-        formData.append('language', language.value); */
+        /*   const formData = new FormData();
+          formData.append('name', title.value);
+          formData.append('description', description.value);
+          formData.append('category', category.value);
+          formData.append('voice', voice.value);
+          formData.append('language', language.value); */
 
 
         fetch('/create-project', {
@@ -41,6 +39,7 @@ export default function CreateProject({ isOpen, categories, voices, handleCloseM
                     window.location.href = '/projects';
                 } else {
                     console.log(data);
+                    handleReloadProject()
                     handleCloseModalCreateProject()
                 }
             })
@@ -94,7 +93,7 @@ export default function CreateProject({ isOpen, categories, voices, handleCloseM
                         </select>
                     </div>
                     <div className="flex justify-between items-center gap-x-6" >
-                    <button
+                        <button
                             type='button'
                             onClick={handleCloseModalCreateProject}
                             className="w-full bg-gray-500 hover:bg-blackblue/60 text-white px-4 py-2 rounded"

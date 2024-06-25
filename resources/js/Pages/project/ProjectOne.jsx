@@ -10,26 +10,37 @@ import IconBackHistory from '@/Components/Icons/IconBackHistory';
 import { Fragment } from 'react';
 import { Menu, Transition } from '@headlessui/react';
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
+import Modal from '@/Components/Modal';
+import { FaArrowLeft } from 'react-icons/fa';
 
 const ProjectOne = ({ project, chapters }) => {
     if (chapters[0] == null) {
-        return "irns";
+        console.log('cjj');
+
+        return (
+            <Modal show={true} maxWidth='lg' >
+                <div className='w-[90%] mx-auto p-6'>
+                    <div className='mb-8 text-center text-red-600 text-xl font-bold '>
+                        There is no chapter available for this project.
+                    </div>
+                    <div className='flex justify-between space-x-8'>
+                        <a href="/" className='w-full text-center py-2 px-4 rounded-lg bg-slate-900 text-slate-100'>
+                            Close
+                        </a>
+                        <a href={`/project/${project.id}/config`} className={`w-full py-2 px-4 rounded-lg  text-center bg-indigo-600 hover:bg-indigo-700 hover:text-white text-slate-100`}>
+                            Add Chapters
+                        </a>
+                    </div>
+                </div>
+            </Modal>
+        );
     }
     const [chapterCurrent, setChapterCurrent] = useState(chapters[0]);
+    const [titleProject, setTitleProject] = useState(chapterCurrent.chapter_title)
     const [dataAudio, setDataAudio] = useState(null);
     const [pageChapter, setPageChapter] = useState(1);
     const [itemsPerPageHistory, setItemsPerPageHistory] = useState(3);
-    /*
-    _LANGUE
-    _VOICES
-    _STABILITY
-    _SIMILARY
-    _STYLE
-    _SPEAKER_BOOST
-    _CHAPTER_TEXT
-    _CHAPTER_ID
 
-    */
     const [langue, setLangue] = useState('En');
     const [voiceChapter, setVoiceChapter] = useState(project.default_voice);
     const [stability, setStability] = useState(50);
@@ -121,21 +132,152 @@ const ProjectOne = ({ project, chapters }) => {
 
 
     const handlePageClick = (pageNumber) => {
+
         setPageChapter(pageNumber);
     };
 
     //DropDown seetings
     function classNames(...classes) {
         return classes.filter(Boolean).join(' ')
-      }
+    }
+    //rename chapter
+    const [valueShowModalRenameChapter, setValueShowModalRenameChapter] = useState(false);
+    const [titleChapterCurrentModified, setTitleChapterCurrentModified] = useState('')
+    const [valueShowModalDeleteP, setValueShowModalDeleteP] = useState(false);
+
+
+    const ShowChangeNameChapter = () => {
+        setValueShowModalRenameChapter(true)
+
+    };
+
+    const handleEditChapter = () => {
+        fetch('/project/edit-chapter', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({
+                project_id: chapterCurrent.project_id,
+                chapter_id: chapterCurrent.id,
+                chapter_title: titleChapterCurrentModified,
+            }),
+        })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(errData => {
+                        throw new Error(errData.message || 'Unknown error');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log(data);
+                chapterCurrent.chapter_title = titleChapterCurrentModified
+                setValueShowModalRenameChapter(false)
+            })
+            .catch(error => console.log(error));
+    }
+
+
+    const CloseModalRenameChapter = () => {
+        setValueShowModalRenameChapter(false)
+    };
+
+    //Delete chapter
+    const [valueShowModalDeleteChapter, setValueShowModalDeleteChapter] = useState(false);
+
+
+    const ShowDeleteChapter = () => {
+        setValueShowModalDeleteChapter(true)
+
+    };
+
+    const handleDeleteChapter = () => {
+        fetch('/project/delete-chapter', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({
+                project_id: chapterCurrent.project_id,
+                chapter_id: chapterCurrent.id,
+            }),
+        })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(errData => {
+                        throw new Error(errData.message || 'Unknown error');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log(data);
+                setValueShowModalDeleteChapter(false)
+            })
+            .catch(error => console.log(error));
+    }
+
+
+    const CloseModalDeleteChapter = () => {
+        setValueShowModalDeleteChapter(false)
+    };
 
     return (
 
         <div className="flex flex-col justify-between min-h-screen" id='projectOne'>
+            <Modal show={valueShowModalRenameChapter} maxWidth='lg' >
+                <div className='w-[90%] mx-auto p-6'>
+                    <div className='mb-6'>
+                        <input type="text"
+                            placeholder='Chapter Name'
+                            required
+                            onChange={(e) => { setTitleChapterCurrentModified(e.target.value) }}
+                            className='w-full mx-auto block bg-indigo-100  rounded-lg'
+                        ></input>
+                    </div>
+                    <div className='flex justify-between space-x-8'>
+                        <button onClick={CloseModalRenameChapter} className='w-full bg-slate-900 text-slate-100'>
+                            Close
+                        </button>
+                        <button onClick={handleEditChapter} className={`${titleChapterCurrentModified == '' ? 'opacity-50 hover:bg-indigo-600' : ''}  w-full bg-indigo-600 hover:bg-indigo-700 hover:text-white text-slate-100`}>
+                            Update
+                        </button>
+                    </div>
+
+                </div>
+
+
+            </Modal>
+            <Modal show={valueShowModalDeleteChapter} maxWidth='lg' >
+                <div className='w-[90%] mx-auto p-6'>
+                    <div className='mb-8 text-center text-red-600 text-xl font-bold '>
+                        Are you sure you want to delete this Chapter ?
+                    </div>
+                    <div className='flex justify-between space-x-8'>
+                        <button onClick={CloseModalDeleteChapter} className='w-full bg-slate-900 text-slate-100'>
+                            No
+                        </button>
+                        <button onClick={handleDeleteChapter} className={` w-full bg-red-600 bg-red-600 hover:bg-red-700 hover:text-white text-slate-100`}>
+                            Delete
+                        </button>
+                    </div>
+
+                </div>
+
+
+            </Modal>
             <Head title={'ProjectOne'} />
             <header>
                 <div className='flex items-center space-x-4'>
-                    <IconBackHistory />
+                    <a href='/project' style={buttonStyle} className='hover:text-indigo-500' >
+                        <FaArrowLeft /> Back
+                    </a>
                     <h2 className="text-2xl font-bold  bg-gradient-to-r from-orange-800 via-indigo-200  to-violet-900 text-transparent bg-clip-text uppercase text-center">{project.title}</h2>
                 </div>
 
@@ -164,9 +306,9 @@ const ProjectOne = ({ project, chapters }) => {
                             <h2 className='text-white font-bold'>Chapter {chapterCurrent.chapter_number}: {chapterCurrent.chapter_title}</h2>
                             <Menu as="div" className="relative inline-block text-left">
                                 <div>
-                                    <Menu.Button className="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-indigo-400 px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-indigo-300 hover:bg-gray-50">
-                                    Chapter options
-                                        <ChevronDownIcon className="-mr-1 h-5 w-5 text-gray-400" aria-hidden="true" />{/*
+                                    <Menu.Button className="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-indigo-400 px-3 py-2 text-sm font-semibold text-slate-100 hover:text-indigo-400 shadow-sm ring-1 ring-inset ring-indigo-300 hover:bg-indigo-200">
+                                        Chapter options
+                                        <ChevronDownIcon className="-mr-1 h-5 w-5 text-gray-100" aria-hidden="true" />{/*
                                         <ChevronUpIcon className="-mr-1 h-5 w-5 text-gray-400" aria-hidden="true" /> */}
                                     </Menu.Button>
                                 </div>
@@ -184,28 +326,17 @@ const ProjectOne = ({ project, chapters }) => {
                                             <Menu.Item>
                                                 {({ active }) => (
                                                     <a
-                                                        href="#"
+                                                        href="javascript:void(0);"
+                                                        onClick={ShowChangeNameChapter}
                                                         className={classNames(
-                                                            active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                                                            active ? 'bg-indigo-100 text-gray-900' : 'text-gray-700',
                                                             'block px-4 py-2 text-sm'
                                                         )}
                                                     >
                                                         Edit
                                                     </a>
                                                 )}
-                                            </Menu.Item>
-                                            <Menu.Item>
-                                                {({ active }) => (
-                                                    <a
 
-                                                        className={classNames(
-                                                            active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
-                                                            'block px-4 py-2 text-sm'
-                                                        )}
-                                                    >
-                                                        Duplicate
-                                                    </a>
-                                                )}
                                             </Menu.Item>
                                         </div>
 
@@ -213,7 +344,8 @@ const ProjectOne = ({ project, chapters }) => {
                                             <Menu.Item>
                                                 {({ active }) => (
                                                     <a
-                                                        href="#"
+                                                        href="javascript:void(0);"
+                                                        onClick={ShowDeleteChapter}
                                                         className={classNames(
                                                             active ? 'bg-red-100 text-red-900' : 'text-red-700',
                                                             'block px-4 py-2 text-sm'
@@ -274,7 +406,7 @@ const ProjectOne = ({ project, chapters }) => {
                             Introduction
                         </button>
                         {
-                            displayedChapters.slice(0, 3).map((chapter, index) => (
+                            displayedChapters.map((chapter, index) => (
                                 <button key={chapter.id} onClick={() => {
                                     setChapterCurrent(chapter)
                                 }} className={` ${chapter == chapterCurrent ? '!bg-indigo-600 text-slate-300' : 'bg-indigo-300'} block border text-center w-full  p-4 my-4`}>
@@ -285,7 +417,7 @@ const ProjectOne = ({ project, chapters }) => {
                         }
                         <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm  " aria-label="Pagination">
                             <a
-                                href="#"
+                                href="javascript:void(0);"
                                 onClick={handlePageChangeBack}
                                 className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
                             >
@@ -298,7 +430,7 @@ const ProjectOne = ({ project, chapters }) => {
                             {// nombre de pagination en fontion du total page de la page
                                 Array.from({ length: totalPage }, (_, index) => index + 1).map((pageIndex) => (
                                     <a
-                                        href="#"
+                                        href='javascript:void(0);'
                                         onClick={() => handlePageClick(pageIndex)}
                                         aria-current="page"
                                         className={`${pageIndex == pageChapter ? 'bg-indigo-700' : 'bg-indigo-200 '} relative z-10 inline-flex items-center  px-4 py-2 text-sm font-semibold text-white focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600`}
@@ -309,7 +441,7 @@ const ProjectOne = ({ project, chapters }) => {
 
 
                             <a
-                                href="#"
+                                href="javascript:void(0);"
                                 onClick={handlePageChangeNext}
                                 className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
                             >
@@ -446,6 +578,15 @@ const ProjectOne = ({ project, chapters }) => {
         </div>
     );
 };
-
+const buttonStyle = {
+    display: 'flex',
+    alignItems: 'center',
+    padding: '10px',
+    backgroundColor: 'none',
+    border: 'none',
+    borderRadius: '5px',
+    cursor: 'pointer',
+    fontSize: '16px',
+};
 export default ProjectOne;
 
